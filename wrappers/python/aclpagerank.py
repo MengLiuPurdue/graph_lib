@@ -25,7 +25,7 @@ def python_wrapper(n,ei,ej,alpha,eps,seedids,nseedids,maxsteps,xlength,fun_id):
     edge_tuples.sort(key=itemgetter(0,1))
     
     #load library
-    lib=ctypes.cdll.LoadLibrary("./libaclpagerank.dylib")
+    lib=ctypes.cdll.LoadLibrary("./libgraph.dylib")
     
     #define proper data type
     if fun_id == 0:

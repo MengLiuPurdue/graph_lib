@@ -25,13 +25,13 @@ values=zeros(xlength,1);
 xPtr = libpointer(indtype,x);
 valuePtr = libpointer('doublePtr',values);
 seedPtr = libpointer(indtype,seedids);
-loadlibrary('libaclpagerank','c_interface.h')
+loadlibrary('libgraph','aclpagerank_c_interface.h')
 if strcmp(indtype,'int64Ptr')
-    actual_length = calllib('libaclpagerank','aclpagerank64',n,aiPtr, ...
+    actual_length = calllib('libgraph','aclpagerank64',n,aiPtr, ...
                             ajPtr,0,alpha,eps,seedPtr,nseedids,maxsteps, ...
                             xPtr,xlength,valuePtr);
 else
-    actual_length = calllib('libaclpagerank','aclpagerank32',n,aiPtr, ...
+    actual_length = calllib('libgraph','aclpagerank32',n,aiPtr, ...
                             ajPtr,0,alpha,eps,seedPtr,nseedids,maxsteps, ...
                             xPtr,xlength,valuePtr);
 end    
@@ -39,4 +39,4 @@ xids=get(xPtr,'Value');
 values=get(valuePtr,'Value');
 xids=xids(1:actual_length);
 values=values(1:actual_length);
-unloadlibrary libaclpagerank;
+unloadlibrary libgraph;

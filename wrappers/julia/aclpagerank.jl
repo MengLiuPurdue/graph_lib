@@ -15,14 +15,14 @@ function julia_wrapper{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
     if dataType == 0
         xids=zeros(Cuint,xlength);
         values=zeros(Cdouble,xlength);
-        actual_length=ccall((:aclpagerank32,"libaclpagerank"),Cuint,
+        actual_length=ccall((:aclpagerank32,"libgraph"),Cuint,
                             (Cuint,Ptr{Cuint},Ptr{Cuint},Cuint,Cdouble,Cdouble,
                             Ptr{Cuint},Cuint,Cuint,Ptr{Cuint},Cuint,Ptr{Cdouble}),n,A.colptr,
                             A.rowval,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values);
     elseif dataType == 1
         xids=zeros(Int64,xlength);
         values=zeros(Cdouble,xlength);
-        actual_length=ccall((:aclpagerank64,"libaclpagerank"),Int64,
+        actual_length=ccall((:aclpagerank64,"libgraph"),Int64,
                             (Int64,Ptr{Int64},Ptr{Int64},Int64,Cdouble,Cdouble,
                             Ptr{Int64},Int64,Int64,Ptr{Int64},Int64,Ptr{Cdouble}),n,A.colptr,
                             A.rowval,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values);   

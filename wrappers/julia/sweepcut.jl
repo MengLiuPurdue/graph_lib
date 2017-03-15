@@ -11,11 +11,11 @@ function julia_wrapper{T}(A::SparseMatrixCSC{T,Int64},ids,num,n,values,fun_id)
     offset=1;
     results=zeros(Int64,num);
     if fun_id == 1
-        actual_length=ccall((:sweepcut_without_sorting64,"libsweepcut"),Int64,(Ptr{Int64},
+        actual_length=ccall((:sweepcut_without_sorting64,"libgraph"),Int64,(Ptr{Int64},
                 Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),ids,results,num,n,A.colptr,
                 A.rowval,offset);
     elseif fun_id == 0
-        actual_length=ccall((:sweepcut_with_sorting64,"libsweepcut"),Int64,(Ptr{Cdouble},Ptr{Int64},
+        actual_length=ccall((:sweepcut_with_sorting64,"libgraph"),Int64,(Ptr{Cdouble},Ptr{Int64},
                 Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),values,ids,results,num,n,A.colptr,
                 A.rowval,offset);
     else

@@ -24,7 +24,7 @@ def python_wrapper(n,ei,ej,ids,num,values,fun_id):
     edge_tuples.sort(key=itemgetter(0,1))
     
     #load library
-    lib=ctypes.cdll.LoadLibrary("./libsweepcut.dylib")
+    lib=ctypes.cdll.LoadLibrary("./libgraph.dylib")
     
     #define proper data type and choose proper C function
     if fun_id[0] == 0:
