@@ -1,3 +1,23 @@
+/*
+aclpagerank with C interface
+
+ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
+
+alpha - value of alpha
+
+eps - value of epsilon
+
+seedids,nseedids - the set of indices for seeds
+
+maxsteps - the max number of steps
+
+xlength - the max number of ids in the solution vector
+
+xids, actual_length - the solution vector
+
+values - the pagerank value vector for xids (already sorted in decreasing order)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unordered_map>
@@ -167,60 +187,3 @@ vtype get_degree(sparserow<vtype, itype>* rows, vtype id)
     return rows->ai[id + 1] - rows->ai[id];
 }
 
-/*vtype sweep_cut(node* possible_nodes, vtype array_size, vtype* xids, vtype xlength, sparserow* rows, double* values)
-{
-    std::sort(possible_nodes, possible_nodes + array_size, myobject);
-    std::unordered_map<vtype, size_t> rank;
-    int i, j;
-    for(i = 0; i < array_size; i ++)
-    {
-        rank[possible_nodes[i].node_id] = i + 1;
-    }
-    vtype total_degree = rows->ai[rows->m] - rows->offset;
-    vtype deg, cut_change, neighbor, min_id;
-    double cur_cond;
-    vtype curcutsize = 0;
-    vtype curvolume = 0;
-    double min_cond = -1;
-    for(i = 0; i < array_size; i ++)
-    {
-        if((i+1) > xlength)
-        {
-            break;
-        }
-        vtype v = possible_nodes[i].node_id;
-        deg = get_degree(rows, v);
-        cut_change = deg;
-        for(j = rows->ai[v] - rows->offset; j < rows->ai[v+1] - rows->offset; j++)
-        {
-            neighbor = rows->aj[j] - rows->offset;
-            if(rank.count(neighbor) > 0 && rank[neighbor] < rank[v])
-            {
-                cut_change -= 2;
-            }
-        }
-        curcutsize += cut_change;
-        curvolume += deg;
-        if(curvolume == 0 || total_degree - curvolume == 0)
-        {
-            cur_cond = 1;
-        }
-        else
-        {
-            cur_cond = (double)curcutsize / (double)std::min(curvolume, total_degree - curvolume);
-        }
-
-        if(min_cond == -1 || cur_cond < min_cond)
-        {
-            min_cond = cur_cond;
-            min_id = i;
-        }
-    }
-
-    for(j = 0; j <= min_id; j ++)
-    {
-        xids[j] = possible_nodes[j].node_id;
-        values[j] = possible_nodes[j].node_value;
-    }
-    return min_id+1;
-}*/

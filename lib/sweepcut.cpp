@@ -1,3 +1,38 @@
+/*
+sweep cut procedure with C interface
+
+ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
+
+ids - the order of vertices given
+
+results - the best set with the smallest conductance
+
+actual_length - the number of vertices in the best set
+
+num - the number of vertices given
+
+values - A vector scoring each vertex (e.g. pagerank value). This will be sorted and turned into one of the other inputs.
+
+This interface contains 6 functions :
+
+sweepcut\_with\_sorting64
+
+sweepcut\_with\_sorting32 
+
+sweepcut\_with\_sorting32_64
+
+sweepcut\_without\_sorting64
+
+sweepcut\_without\_sorting32 
+
+sweepcut\_without\_sorting32_64
+
+"64" means all data is in 64bit, "32" means all data is in 32bit and "32_64" means "ai" is in 64bit while the others are in 32bit.
+
+The first three functions will sort "ids" based on the decreasing order of "values", while the other three don't have this step.
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unordered_map>
