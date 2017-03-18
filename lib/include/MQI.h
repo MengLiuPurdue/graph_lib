@@ -24,13 +24,16 @@ double dinic_dfs(vtype u, double fl, vtype src, vtype dest, vtype *pro, vtype *n
 template<typename vtype, typename itype>
 void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, double *flow, double *cap, vtype* length);
 
-//template<typename vtype, typename itype>
-//pair<double, vtype> max_flow(itype* ai, vtype* aj, double* weight, vtype nverts, vtype src, vtype dest, vtype* mincut);
-
 template<typename vtype, typename itype>
 pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype nedges, vtype nverts, 
-                             unordered_map<vtype, vtype>R_map, vtype src, vtype dest, vtype* mincut);
+                             unordered_map<vtype, vtype>R_map, unordered_map<vtype, vtype>degree_map, 
+                             vtype src, vtype dest, vtype* mincut);
 
-#include "maxflow.cpp"
-#include "MQI.cpp"
+template<typename vtype, typename itype>
+void build_map(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, 
+        unordered_map<vtype, vtype>* degree_map, vtype* R, vtype nR);
+
+
+#include "../maxflow.cpp"
+#include "../MQI.cpp"
 #endif

@@ -82,7 +82,6 @@ void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, d
 {
     cut[u] = 1;
     *length = *length + 1;
-    //unused<vtype>(*length);
     for(vtype &e = another_pro[u]; e >= 0; e = next[e]){
         vtype v = to[e];
         if(flow[e] < cap[e] && cut[v] == 0){
@@ -94,9 +93,9 @@ void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, d
 
 template<typename vtype, typename itype>
 pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype nedges, vtype nverts, 
-                             unordered_map<vtype, vtype>R_map, vtype src, vtype dest, vtype* mincut)
+                             unordered_map<vtype, vtype>R_map, unordered_map<vtype, vtype>degree_map, 
+                             vtype src, vtype dest, vtype* mincut)
 {
-    //itype nedges = ai[nverts];
     vtype* Q = (vtype*)malloc(sizeof(vtype) * nverts);
     vtype* fin = (vtype*)malloc(sizeof(vtype) * nverts);
     vtype* pro = (vtype*)malloc(sizeof(vtype) * nverts);
@@ -112,23 +111,29 @@ pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype ned
     itype nEdge = 0;
     for(auto R_iter = R_map.begin(); R_iter != R_map.end(); ++R_iter){
         vtype u = R_iter->first;
+        vtype u1 = R_iter->second;
         for(vtype j = ai[u]; j < ai[u + 1]; j ++){
             vtype v = aj[j];
+            auto got = R_map.find(v);
             if(R_map.count(v) > 0){
+                vtype v1 = got->second;
                 double w = a;
-                new_edge<vtype, itype>(u, v, w, to, cap, flow, next, fin, &nEdge);
+                new_edge<vtype, itype>(u1, v1, w, to, cap, flow, next, fin, &nEdge);
             }
         }
     }
     for(auto R_iter = R_map.begin(); R_iter != R_map.end(); ++R_iter){
-        vtype u = src;
+        vtype u1 = src;
         vtype v = R_iter->first;
-        double w = a;
-        new_edge(u, v, w, to, cap, flow, next, fin, &nEdge);
-        u = v;
-        v = dest;
-        w = c;
-        new_edge(u, v, w, to, cap, flow, next, fin, &nEdge);
+        vtype v1 = R_iter->second;
+        auto got = degree_map.find(v);
+        double w = a * got->second;
+        new_edge(u1, v1, w, to, cap, flow, next, fin, &nEdge);
+        u1 = v1;
+        v1 = dest;
+        vtype u = v;
+        w = c * (ai[u + 1] - ai[u]);
+        new_edge(u1, v1, w, to, cap, flow, next, fin, &nEdge);
     }
 
     double ret = 0;
