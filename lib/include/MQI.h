@@ -1,0 +1,36 @@
+#ifndef MQI_H
+#define MQI_H
+
+#include <utility>
+#include <unordered_map>
+
+using namespace std;
+
+template<typename vtype,typename itype>
+vtype get_degree(itype* ai, vtype id);
+
+template<typename vtype, typename itype>
+void MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype* R);
+
+template<typename vtype, typename itype>
+void new_edge(vtype u, vtype v, double weight, vtype *to, double *cap, double *flow, vtype *next, vtype *fin, itype *nEdge);
+
+template<typename vtype, typename itype>
+bool dinic_bfs(vtype nverts, vtype src, vtype dest, vtype *dist, vtype *Q, vtype *fin, vtype *next, vtype *to, double *flow, double *cap);
+
+template<typename vtype, typename itype>
+double dinic_dfs(vtype u, double fl, vtype src, vtype dest, vtype *pro, vtype *next, vtype *to, vtype *dist, double *cap, double *flow);
+
+template<typename vtype, typename itype>
+void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, double *flow, double *cap, vtype* length);
+
+//template<typename vtype, typename itype>
+//pair<double, vtype> max_flow(itype* ai, vtype* aj, double* weight, vtype nverts, vtype src, vtype dest, vtype* mincut);
+
+template<typename vtype, typename itype>
+pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype nedges, vtype nverts, 
+                             unordered_map<vtype, vtype>R_map, vtype src, vtype dest, vtype* mincut);
+
+#include "maxflow.cpp"
+#include "MQI.cpp"
+#endif
