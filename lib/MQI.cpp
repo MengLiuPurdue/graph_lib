@@ -64,29 +64,20 @@ void MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype* R)
     unordered_map<vtype, vtype> degree_map;
     build_map<vtype, itype>(ai, aj, &R_map, &degree_map, R, nR);
     itype nedges = 0;
-    itype deg;
     double condOld = 1;
     double condNew;
     itype total_degree = ai[n];
-    itype curvol = 0;
-    itype curcutsize = 0;
-    for(vtype i = 0; i < nR; i ++){
-        vtype v = R[i];
-        deg = get_degree<vtype, itype>(ai, v);
-        curvol += deg;
-        for(itype j = ai[v]; j < ai[v + 1]; j ++){
-            if(R_map.count(aj[j]) == 0){
-                curcutsize ++;
-            }
-        }
-    }
+    pair<itype, itype> set_stats = get_stats<vtype, itype>(ai, aj, &R_map, nR);
+    itype curvol = set_stats.first;
+    itype curcutsize = set_stats.second;
     nedges = curvol - curcutsize + 2 * nR;
+    //    cout << "deg " << total_degree << " cut " << curcutsize << " vol " << curvol << endl;
     condNew = (double)curcutsize/(double)min(total_degree - curvol, curvol);
     cout << "iter: " << total_iter << " conductance: " << condNew << endl;
     total_iter ++;
     vtype* mincut = (vtype*)malloc(sizeof(vtype) * (nR + 2));
     pair<double, vtype> retData = max_flow<vtype, itype>(ai, aj, curvol, curcutsize, nedges, 
-                                                         nR + 2, R_map, degree_map, nR, nR + 1, mincut);
+            nR + 2, R_map, degree_map, nR, nR + 1, mincut);
     vtype nRold = nR;
     vtype nRnew; 
     while(condNew < condOld){
@@ -96,25 +87,18 @@ void MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype* R)
         for(auto R_iter = R_map.begin(); R_iter != R_map.end(); ++R_iter){
             vtype u = R_iter->first;
             vtype u1 = R_iter->second;
-            if(mincut[u1] == 1){
-                deg = get_degree<vtype, itype>(ai, u);
-                curvol -= deg;
-                for(vtype j = ai[u]; j < ai[u + 1]; j ++){
-                    vtype v = aj[j];
-                    if(R_map.count(v) > 0){
-                        curcutsize ++;
-                    }
-                    else{
-                        curcutsize --;
-                    }
-                } 
-            }
-            else{
+            if(mincut[u1] == 0){
                 Rnew[iter] = u;
                 iter ++;
             }
         }
         condOld = condNew;
+        R_map.clear();
+        degree_map.clear();
+        build_map<vtype, itype>(ai, aj, &R_map, &degree_map, Rnew, nRnew);
+        set_stats = get_stats<vtype, itype>(ai, aj, &R_map, nRnew);
+        curvol = set_stats.first;
+        curcutsize = set_stats.second;
         nedges = curvol - curcutsize + 2 * nRnew;
         if(nRnew > 0){
             condNew = (double)curcutsize/(double)min(total_degree - curvol, curvol);
@@ -122,16 +106,34 @@ void MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype* R)
             degree_map.clear();
             build_map<vtype, itype>(ai, aj, &R_map, &degree_map, Rnew, nRnew);
             retData = max_flow<vtype, itype>(ai, aj, curvol, curcutsize, nedges, nRnew + 2, 
-                                             R_map, degree_map, nRnew, nRnew + 1, mincut);
+                    R_map, degree_map, nRnew, nRnew + 1, mincut);
         }
         free(Rnew);
         nRold = nRnew;
+        cout << "iter: " << total_iter << " conductance: " << condNew << endl;
+        total_iter ++;
     }
-    cout << "iter: " << total_iter << " conductance: " << condNew << endl;
-    total_iter ++;
 
     free(mincut);
 }
 
+    template<typename vtype, typename itype>
+pair<itype, itype> get_stats(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, vtype nR)
+{
+    itype curvol = 0;
+    itype curcutsize = 0;
+    for(auto R_iter = (*R_map).begin(); R_iter != (*R_map).end(); ++ R_iter){
+        vtype v = R_iter->first;
+        itype deg = get_degree<vtype, itype>(ai, v);
+        curvol += deg;
+        for(itype j = ai[v]; j < ai[v + 1]; j ++){
+            if((*R_map).count(aj[j]) == 0){
+                curcutsize ++;
+            }
+        }
+    }
 
+    pair<itype, itype> set_stats (curvol, curcutsize);
+    return set_stats;
+}
 #endif

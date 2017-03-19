@@ -30,6 +30,9 @@ pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype ned
                              vtype src, vtype dest, vtype* mincut);
 
 template<typename vtype, typename itype>
+pair<itype, itype> get_stats(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, vtype nR);
+
+template<typename vtype, typename itype>
 void build_map(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, 
         unordered_map<vtype, vtype>* degree_map, vtype* R, vtype nR);
 
