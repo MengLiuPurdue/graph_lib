@@ -10,7 +10,7 @@ template<typename vtype,typename itype>
 vtype get_degree(itype* ai, vtype id);
 
 template<typename vtype, typename itype>
-void MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype* R);
+vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype* ret_set);
 
 template<typename vtype, typename itype>
 void new_edge(vtype u, vtype v, double weight, vtype *to, double *cap, double *flow, vtype *next, vtype *fin, itype *nEdge);
@@ -25,15 +25,15 @@ template<typename vtype, typename itype>
 void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, double *flow, double *cap, vtype* length);
 
 template<typename vtype, typename itype>
-pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype nedges, vtype nverts, 
+pair<double, vtype> max_flow(itype* ai, vtype* aj, vtype offset, double a, double c, itype nedges, vtype nverts, 
                              unordered_map<vtype, vtype>R_map, unordered_map<vtype, vtype>degree_map, 
                              vtype src, vtype dest, vtype* mincut);
 
 template<typename vtype, typename itype>
-pair<itype, itype> get_stats(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, vtype nR);
+pair<itype, itype> get_stats(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map, vtype nR);
 
 template<typename vtype, typename itype>
-void build_map(itype* ai, vtype* aj, unordered_map<vtype, vtype>* R_map, 
+void build_map(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map, 
         unordered_map<vtype, vtype>* degree_map, vtype* R, vtype nR);
 
 

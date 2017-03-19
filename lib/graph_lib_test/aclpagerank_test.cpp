@@ -20,6 +20,11 @@ int main()
 	double* values = (double*)malloc(sizeof(double)*n);
 	uint32_t actual_length = aclpagerank32(n,ai,aj,0,alpha,eps,seedids,nseedids,maxstep,xids,xlength,values);
 
-	cout<<actual_length<<endl;
+	cout << "actual length is:" << endl;
+    cout<<actual_length<<endl;
+    cout << "xids:" << endl;
+    for(int i = 0; i < actual_length; i ++){
+        cout << xids[i] << endl;
+    }
 	return EXIT_SUCCESS;
 }

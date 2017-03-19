@@ -14,13 +14,13 @@ CC := $(CXX)
 CXXFLAGS := -std=c++11 -Wall -O3 -Wshadow -Werror -fPIC
 
 SWEEPCUT_SRCS = ../sweepcut.cpp sweepcut_test.cpp
-ACLPAGERANK_SRCS = ../aclpagerank.cpp aclpagerank_test.cpp
-MQI_SRCS = ../MQI.cpp MQI_test.cpp ../maxflow.cpp
+ACLPAGERANK_SRCS = ../aclpagerank.cpp aclpagerank_test.cpp 
+MQI_SRCS = ../MQI.cpp MQI_test.cpp ../maxflow.cpp ../MQI_c_interface.cpp
 SWEEPCUT_OBJS = $(SWEEPCUT_SRCS:%.cpp=%.o)
 ACLPAGERANK_OBJS = $(ACLPAGERANK_SRCS:%.cpp=%.o)
 MQI_OBJS = $(MQI_SRCS:%.cpp=%.o)
 
-LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI.o ../maxflow.o
+LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o
 
 all: sweepcut aclpagerank MQI $(LIB)
 

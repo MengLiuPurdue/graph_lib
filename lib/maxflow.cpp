@@ -92,10 +92,11 @@ void find_cut(vtype u, vtype *cut, vtype *another_pro, vtype *next, vtype *to, d
 
 
 template<typename vtype, typename itype>
-pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype nedges, vtype nverts, 
+pair<double, vtype> max_flow(itype* ai, vtype* aj, vtype offset, double a, double c, itype nedges, vtype nverts,
                              unordered_map<vtype, vtype>R_map, unordered_map<vtype, vtype>degree_map, 
                              vtype src, vtype dest, vtype* mincut)
 {
+    //cout << "nverts " << nverts << " nedges " << nedges << endl;
     vtype* Q = (vtype*)malloc(sizeof(vtype) * nverts);
     vtype* fin = (vtype*)malloc(sizeof(vtype) * nverts);
     vtype* pro = (vtype*)malloc(sizeof(vtype) * nverts);
@@ -112,8 +113,8 @@ pair<double, vtype> max_flow(itype* ai, vtype* aj, double a, double c, itype ned
     for(auto R_iter = R_map.begin(); R_iter != R_map.end(); ++R_iter){
         vtype u = R_iter->first;
         vtype u1 = R_iter->second;
-        for(vtype j = ai[u]; j < ai[u + 1]; j ++){
-            vtype v = aj[j];
+        for(vtype j = ai[u] - offset; j < ai[u + 1] - offset; j ++){
+            vtype v = aj[j] - offset;
             auto got = R_map.find(v);
             if(R_map.count(v) > 0){
                 vtype v1 = got->second;
