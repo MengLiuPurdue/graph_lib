@@ -15,7 +15,7 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def python_wrapper(n,ei,ej,ids,num,values,fun_id):
+def sweepcut(n,ei,ej,ids,num,values,fun_id):
     #sort edge list
     edge_tuples=[]
     edge_num=len(ei)
@@ -24,7 +24,7 @@ def python_wrapper(n,ei,ej,ids,num,values,fun_id):
     edge_tuples.sort(key=itemgetter(0,1))
     
     #load library
-    lib=ctypes.cdll.LoadLibrary("./libgraph.dylib")
+    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
     
     #define proper data type and choose proper C function
     if fun_id[0] == 0:
@@ -112,7 +112,7 @@ def python_wrapper(n,ei,ej,ids,num,values,fun_id):
     else:
         print "please specify a C funtion"
 
-    actual_results=np.empty(actual_length,dtype=float_type)
+    actual_results=np.empty(actual_length,dtype=vtype)
     actual_results[:]=[results[i] for i in range(actual_length)]
 
     return (actual_length,actual_results)

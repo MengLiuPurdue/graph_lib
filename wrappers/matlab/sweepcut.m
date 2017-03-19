@@ -7,7 +7,7 @@
 % values - A vector scoring each vertex (e.g. pagerank value). 
 %          This will be sorted and turned into one of the other inputs.
 % fun_id - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
-function [actual_length,results]=matlab_wrapper(A,ids,num,values,fun_id)
+function [actual_length,results]=sweepcut(A,ids,num,values,fun_id)
 [ajPtr,aiPtr,~]=sparse_arrays_ptr(A);
 [n,~]=size(A);
 switch computer
@@ -23,7 +23,7 @@ results = zeros(num,1);
 resultsPtr = libpointer(indtype,results);
 idsPtr = libpointer(indtype,ids);
 offset=0;
-loadlibrary('libgraph','sweepcut_c_interface.h')
+loadlibrary('../../lib/graph_lib_test/libgraph','../../lib/include/sweepcut_c_interface.h')
 if strcmp(indtype,'int64Ptr')
     if fun_id == 1
         actual_length = calllib('libgraph','sweepcut_without_sorting64',idsPtr,...

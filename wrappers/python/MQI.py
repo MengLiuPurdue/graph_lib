@@ -1,14 +1,11 @@
-# A python wrapper for aclpagerank
-# n - number of vertices
-# ei,ej - edge list
-# alpha - value of alpha
-# eps - value of epsilon
-# seedids,nseedids - the set of indices for seeds
-# maxsteps - the max number of steps
-# xlength - the max number of ids in the solution vector
-# xids, actual_length - the solution vector
-# values - the pagerank value vector for xids (already sorted in decreasing order)
-# fun_id - 0 for aclpagerank64, 1 for aclpagerank32 and 2 for aclpagerank32_64
+# A python wrapper for MQI
+# ei,ej - edge list representation of graph
+# n - number of nodes in the graph
+# R - seed set
+# nR - number of nodes in seed set
+# actual_length - number of nodes in the optimal subset
+# ret_set - optimal subset with the smallest conductance
+# fun_id - 0 for MQI64, 1 for MQI32 and 2 for MQI32_64
 
 from operator import itemgetter
 import numpy as np
@@ -16,7 +13,7 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def aclpagerank(n,ei,ej,alpha,eps,seedids,nseedids,maxsteps,xlength,fun_id):
+def MQI(n,ei,ej,nR,R,fun_id):
     #sort edge list
     edge_tuples=[]
     edge_num=len(ei)
@@ -33,19 +30,19 @@ def aclpagerank(n,ei,ej,alpha,eps,seedids,nseedids,maxsteps,xlength,fun_id):
         vtype=np.int64
         ctypes_itype=ctypes.c_int64
         ctypes_vtype=ctypes.c_int64
-        fun=lib.aclpagerank64
+        fun=lib.MQI64
     elif fun_id == 1:
         itype=np.uint32
         vtype=np.uint32
         ctypes_itype=ctypes.c_uint32
         ctypes_vtype=ctypes.c_uint32
-        fun=lib.aclpagerank32
+        fun=lib.MQI32
     elif fun_id == 2:
         itype=np.int64
         vtype=np.uint32
         ctypes_itype=ctypes.c_int64
         ctypes_vtype=ctypes.c_uint32
-        fun=lib.aclpagerank32_64
+        fun=lib.MQI32_64
     else:
         print "please specify a C funtion: 0 for aclpagerank64, 1 for aclpagerank32 and 2 for aclpagerank32_64"
     
@@ -66,21 +63,17 @@ def aclpagerank(n,ei,ej,alpha,eps,seedids,nseedids,maxsteps,xlength,fun_id):
         ai[i]=ai[i-1]+ai[i]
     
     #call C function
-    seedids=np.array(seedids,dtype=vtype)
-    xids=np.zeros(xlength,dtype=vtype)
-    values=np.zeros(xlength,dtype=float_type)
+    R=np.array(R,dtype=vtype)
+    ret_set=np.zeros(nR,dtype=vtype)
     fun.restype=ctypes_vtype
-    fun.argtypes=[ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
+    fun.argtypes=[ctypes_vtype,ctypes_vtype,
+                  ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,ctypes.c_double,ctypes.c_double,
+                  ctypes_vtype,
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,ctypes_vtype,
-                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
-    actual_length=fun(n,ai,aj,0,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values)
-    actual_values=np.empty(actual_length,dtype=float_type)
-    actual_xids=np.empty(actual_length,dtype=vtype)
-    actual_values[:]=[values[i] for i in range(actual_length)]
-    actual_xids[:]=[xids[i] for i in range(actual_length)]
+                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS")]
+    actual_length=fun(n,nR,ai,aj,0,R,ret_set)
+    actual_set=np.empty(actual_length,dtype=vtype)
+    actual_set[:]=[ret_set[i] for i in range(actual_length)]
     
-    return (actual_length,actual_xids,actual_values)
+    return (actual_length,actual_set)

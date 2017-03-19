@@ -7,5 +7,5 @@ alpha=0.99;
 eps=10^(-7);
 maxsteps=10000000;
 xlength=100;
-[actual_length,xids,values]=matlab_wrapper(A,seedids,nseedids,alpha,eps, ...
+[actual_length,xids,values]=aclpagerank(A,seedids,nseedids,alpha,eps, ...
                                            maxsteps,xlength);

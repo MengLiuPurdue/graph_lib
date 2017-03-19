@@ -1,5 +1,5 @@
-from python_wrapper import python_wrapper
-f = open("minnesota.smat")
+from sweepcut import sweepcut
+f = open("../../graph/minnesota.smat")
 first_line = f.readline().strip()
 import re
 first_line = re.split(" ",first_line)
@@ -24,5 +24,5 @@ ids=[220,613,1610,65,158,229,305,467,608,742,753,953,1506,1516,1574,2154,2251,24
 values=[]
 num=2642
 fun_id=(0,1)
-(actual_length,results)=python_wrapper(n,ei,ej,ids,num,values,fun_id)
+(actual_length,results)=sweepcut(n,ei,ej,ids,num,values,fun_id)
 print actual_length,results

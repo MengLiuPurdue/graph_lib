@@ -7,7 +7,7 @@
 % xlength - the max number of ids in the solution vector
 % xids, actual_length - the solution vector
 % values - the pagerank value vector for xids (already sorted in decreasing order)
-function [actual_length,xids,values]=matlab_wrapper(A,seedids,nseedids, ...
+function [actual_length,xids,values]=aclpagerank(A,seedids,nseedids, ...
                                                     alpha,eps,maxsteps,xlength)
 [ajPtr,aiPtr,~]=sparse_arrays_ptr(A);
 get(ajPtr,'Value')
@@ -25,7 +25,7 @@ values=zeros(xlength,1);
 xPtr = libpointer(indtype,x);
 valuePtr = libpointer('doublePtr',values);
 seedPtr = libpointer(indtype,seedids);
-loadlibrary('libgraph','aclpagerank_c_interface.h')
+loadlibrary('../../lib/graph_lib_test/libgraph','../../lib/include/aclpagerank_c_interface.h')
 if strcmp(indtype,'int64Ptr')
     actual_length = calllib('libgraph','aclpagerank64',n,aiPtr, ...
                             ajPtr,0,alpha,eps,seedPtr,nseedids,maxsteps, ...
