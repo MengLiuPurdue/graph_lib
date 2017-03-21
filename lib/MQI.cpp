@@ -39,6 +39,16 @@ vtype get_degree(itype* ai, vtype id)
     return ai[id + 1] - ai[id];
 }
 
+/*
+ * This is an implementation of the MQI algorithm from Lang and Rao (2004). 
+ * The goal is to find the best subset of a seed set with the smallest conductance.
+ * n - number of nodes in the graph
+ * nR - number of nodes in the original seed set
+ * ai,aj,offset - the CSR representation of graph with offset for zero based (matlab) and one based arrays (julia)
+ * R - the seed set
+ * ret_set - the best subset
+ * actual_length - the number of nodes in ret_set
+ */
     template<typename vtype, typename itype>
 vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype* ret_set)
 {
