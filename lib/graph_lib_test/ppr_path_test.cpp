@@ -9,8 +9,8 @@ using namespace std;
 
 int main()
 {
-    cout << "test on file ppr_path_test.smat" << endl;
-    FILE *rptr = fopen("../../graph/ppr_path_test.smat", "r");
+    cout << "test on file ppr_path_test.smat with 0 offset" << endl;
+    FILE *rptr = fopen("../../graph/usps_3nn_sparse.smat", "r");
     fseek(rptr, 0, SEEK_END);
     size_t fsize = ftell(rptr);
     char *read_file = (char *)malloc(sizeof(char) * fsize);
@@ -38,12 +38,30 @@ int main()
 	int64_t n = 9298;
 	int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*n);
 	double* values = (double*)malloc(sizeof(double)*n);
-	int64_t actual_length = ppr_path64(n,ai,aj,0,alpha,eps,0.0,seedids,nseedids,xids,xlength,values);
+	int64_t actual_length = ppr_path64(n,ai,aj,0,alpha,eps,0.0,seedids,nseedids,xids,xlength);
 
 	cout<<actual_length<<endl;
     cout << "best set" << endl;
     for(size_t i = 0; i < actual_length; ++ i){
-        cout << xids[i] << endl;
+        cout << xids[i] << " ";
     }
+    cout << endl;
+    
+    cout << "test on file ppr_path_test.smat with 1 offset" << endl;
+    for(int i=0; i < nai; i ++){
+        ai[i] ++;
+    }
+    for(int i=0; i < naj; i ++){
+        aj[i] ++;
+    }
+    seedids[0] = 7576;
+    actual_length = ppr_path64(n,ai,aj,1,alpha,eps,0.0,seedids,nseedids,xids,xlength);
+    
+    cout<<actual_length<<endl;
+    cout << "best set" << endl;
+    for(size_t i = 0; i < actual_length; ++ i){
+        cout << xids[i] << " ";
+    }
+    cout << endl;
 	return EXIT_SUCCESS;
 }

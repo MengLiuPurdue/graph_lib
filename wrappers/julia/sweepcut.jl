@@ -7,7 +7,7 @@
 # values - A vector scoring each vertex (e.g. pagerank value). 
 #          This will be sorted and turned into one of the other inputs.
 # fun_id - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
-function julia_wrapper{T}(A::SparseMatrixCSC{T,Int64},ids,num,n,values,fun_id)
+function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,num,n,values,fun_id)
     offset=1;
     results=zeros(Int64,num);
     if fun_id == 1

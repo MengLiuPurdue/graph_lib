@@ -10,7 +10,6 @@
 function [actual_length,xids,values]=aclpagerank(A,seedids,nseedids, ...
                                                     alpha,eps,maxsteps,xlength)
 [ajPtr,aiPtr,~]=sparse_arrays_ptr(A);
-get(ajPtr,'Value')
 [n,~]=size(A);
 x=zeros(xlength,1);
 switch computer

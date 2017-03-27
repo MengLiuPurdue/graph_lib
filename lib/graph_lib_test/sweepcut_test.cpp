@@ -21,8 +21,9 @@ int main()
     cout << actual_length << endl;
     for(int i = 0; i < actual_length; i ++)
     {
-        cout << ids[i] << endl;
+        cout << ids[i] << " ";
     }
+    cout << endl;
 
     
     return EXIT_SUCCESS;

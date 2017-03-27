@@ -16,8 +16,8 @@ using namespace std;
 
 int main()
 {
-    cout << "test on graph 1" << endl;
-    FILE *rptr = fopen("../../graph/test.smat", "r");
+    cout << "test on Netscience_sparse.smat" << endl;
+    FILE *rptr = fopen("../../graph/Netscience_sparse.smat", "r");
     fseek(rptr, 0, SEEK_END);
     size_t fsize = ftell(rptr);
     char *read_file = (char *)malloc(sizeof(char) * fsize);
@@ -50,8 +50,8 @@ int main()
     cout << endl << "total number of vertices is " << actual_length << endl;
 
     cout << endl;
-    cout << "test on graph 2" << endl;
-    rptr = fopen("../../graph/test1.smat", "r");
+    cout << "test on minnesota_sparse.smat" << endl;
+    rptr = fopen("../../graph/minnesota_sparse.smat", "r");
     fseek(rptr, 0, SEEK_END);
     fsize = ftell(rptr);
     read_file = (char *)malloc(sizeof(char) * fsize);

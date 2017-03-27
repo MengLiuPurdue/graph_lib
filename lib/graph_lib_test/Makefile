@@ -22,9 +22,9 @@ ACLPAGERANK_OBJS = $(ACLPAGERANK_SRCS:%.cpp=%.o)
 MQI_OBJS = $(MQI_SRCS:%.cpp=%.o)
 PPR_PATH_OBJS = $(PPR_PATH_SRCS:%.cpp=%.o)
 
-LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o
+LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o ../ppr_path_c_interface.o
 
-all: sweepcut aclpagerank MQI $(LIB)
+all: sweepcut aclpagerank MQI ppr_path $(LIB)
 
 sweepcut: $(SWEEPCUT_OBJS)
 	$(CC) $(SWEEPCUT_OBJS) -o sweepcut

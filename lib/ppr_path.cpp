@@ -33,9 +33,9 @@ using namespace std;
 template<typename vtype, typename itype>
 vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
         double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength, double* values)
+        vtype xlength)
 {
-    cout << "ppr_stats_mex: preprocessing start: " << endl;
+    cout << "preprocessing start: " << endl;
     sparserow<vtype, itype> r;
     r.m = n;
     r.n = n;
@@ -44,18 +44,18 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
     r.offset = offset;
 
     vector<vtype> seedset;
-    copy_array_to_index_vector<vtype, itype>(seedids, seedset, nseedids);
-    cout << "ppr_stats_mex: preprocessing end: " << endl;
+    copy_array_to_index_vector<vtype, itype>(seedids, seedset, nseedids, offset);
+    cout << "preprocessing end: " << endl;
 
     eps_info<vtype> ep_stats(1000);
     rank_record<vtype> rkrecord;
     vector<vtype> bestclus;
 
-    cout << "ppr_stats_mex: call to hypercluster_graphdiff() start" << endl;
+    cout << "call to hypercluster_graphdiff() start" << endl;
 
     hypercluster_graphdiff_multiple<vtype, itype>(&r, seedset, alpha, eps, rho, ep_stats, rkrecord, bestclus);
 
-    cout << "ppr_stats_mex: call to hypercluster_graphdiff() DONE" << endl;
+    cout << "call to hypercluster_graphdiff() DONE" << endl;
 
     xlength = bestclus.size();
 
@@ -95,8 +95,8 @@ bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
     std::vector<double> oldvol(r_start-r_end+1,0.0);
 
     // get rankings of neighbors of the shifted node
-    for (vtype nzi = G->ai[gindex]; nzi < G->ai[gindex+1]; nzi++){
-        vtype temp_gindex = G->aj[nzi];
+    for (vtype nzi = G->ai[gindex] - G->offset; nzi < G->ai[gindex+1] - G->offset; nzi++){
+        vtype temp_gindex = G->aj[nzi] - G->offset;
         vtype temp_rank = rankinfo.index_to_rank(temp_gindex);
         if ( (temp_rank < r_end) && (temp_rank >= 0) ){ neighbors_ranked_less_than[0] += 1.0; }
         if ( (temp_rank > r_end) && (temp_rank <= r_start) ){
@@ -201,7 +201,7 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
         std::vector<vtype>& cluster )
 {
     cout << "ppr_all_mex::graphdiffseed()  BEGIN " << endl;
-    G->volume = (double)(G->ai[G->m]);
+    G->volume = (double)(G->ai[G->m] - G->offset);
     vtype npush = 0;
     vtype nsteps = 0;
     double best_eps = 1.0;
@@ -258,8 +258,8 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
 
         // STEP 4: update residual
         double update = t*rij;
-        for (vtype nzi=G->ai[ri]; nzi < G->ai[ri+1]; ++nzi) {
-            vtype v = G->aj[nzi];
+        for (vtype nzi=G->ai[ri] - G->offset; nzi < G->ai[ri+1] - G->offset; ++nzi) {
+            vtype v = G->aj[nzi] - G->offset;
             //cout << "update " << update << " sr_degree " << sr_degree(G,v) << endl;
             r.update(v,update/(double)sr_degree(G,v)); // handles the heap internally            
         }
@@ -340,12 +340,12 @@ void hypercluster_graphdiff_multiple(sparserow<vtype, itype>* G, const std::vect
 }  // END hyper_cluster_graphdiff_multiple()
             
 template<typename vtype, typename itype>
-void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n)
+void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n, vtype offset)
 {
     vec.resize(n);
     
     for (size_t i=0; i<n; ++i) {
-        vec[i] = v[i];
+        vec[i] = v[i] - offset;
     }
 }  // END copy_array_to_index_vector()
 

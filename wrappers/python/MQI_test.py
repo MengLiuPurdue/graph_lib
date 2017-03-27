@@ -1,5 +1,5 @@
 from MQI import MQI
-f = open("../../graph/minnesota.smat")
+f = open("../../graph/minnesota_list.smat")
 first_line = f.readline().strip()
 import re
 first_line = re.split(" ",first_line)

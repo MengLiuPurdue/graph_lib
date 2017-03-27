@@ -129,7 +129,7 @@ struct rank_map{
 template<typename vtype, typename itype>
 vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
         double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength, double* values);
+        vtype xlength);
 
 template<typename vtype, typename itype>
 bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
@@ -149,7 +149,7 @@ void hypercluster_graphdiff_multiple(sparserow<vtype, itype>* G, const std::vect
                          std::vector<vtype>& cluster);
 
 template<typename vtype, typename itype>
-void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n);
+void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n, vtype offset);
 
 template<typename vtype, typename itype>
 size_t sr_degree(sparserow<vtype, itype>* s, vtype u);

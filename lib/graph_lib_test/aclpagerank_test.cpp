@@ -24,7 +24,8 @@ int main()
     cout<<actual_length<<endl;
     cout << "xids:" << endl;
     for(int i = 0; i < actual_length; i ++){
-        cout << xids[i] << endl;
+        cout << xids[i] << " ";
     }
+    cout << endl;
 	return EXIT_SUCCESS;
 }
