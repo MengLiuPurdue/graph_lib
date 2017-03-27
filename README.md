@@ -56,3 +56,18 @@ The first three functions will sort "ids" based on the decreasing order of "valu
  * seedids - indices of seed set
  * nseedids - number of indices in seed set
  * xids, xlength, values - the solution vector
+
+## Usage
+Inside the lib/graph\_lib\_test folder, use
+	
+	make
+	
+to create the dynamic library and all the executable files, use
+
+	make test
+	
+to run all the build-in examples, use
+
+	make clean
+	
+to delete all the generated files.
