@@ -55,7 +55,7 @@ The first three functions will sort "ids" based on the decreasing order of "valu
  * rho - value of rho
  * seedids - indices of seed set
  * nseedids - number of indices in seed set
- * xids, xlength, values - the solution vector
+ * xids, xlength - the solution vector
 
 ## Usage
 Inside the lib/graph\_lib\_test folder, use

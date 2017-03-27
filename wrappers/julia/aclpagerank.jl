@@ -8,7 +8,7 @@
 # xids, actual_length - the solution vector
 # values - the pagerank value vector for xids (already sorted in decreasing order)
 # dataType - the type of data, 0 for 32bit and 1 for 64bit
-function julia_wrapper{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
+function aclpagerank{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
                           eps::Float64,seedids,nseedids,maxsteps,xlength,dataType)
     n=A.n;
     offset=1;
