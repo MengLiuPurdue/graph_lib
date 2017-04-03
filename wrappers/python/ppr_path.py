@@ -15,68 +15,42 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def ppr_path(n,ei,ej,alpha,eps,rho,seedids,nseedids,xlength,fun_id):
-    #sort edge list
-    edge_tuples=[]
-    edge_num=len(ei)
-    for i in range(0,edge_num):
-        edge_tuples=edge_tuples+[(ei[i],ej[i])]
-    edge_tuples.sort(key=itemgetter(0,1))
-    
-    #load library
-    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
-    
-    #define proper data type
-    if fun_id == 0:
-        itype=np.int64
-        vtype=np.int64
-        ctypes_itype=ctypes.c_int64
-        ctypes_vtype=ctypes.c_int64
-        fun=lib.ppr_path64
-    elif fun_id == 1:
-        itype=np.uint32
-        vtype=np.uint32
-        ctypes_itype=ctypes.c_uint32
-        ctypes_vtype=ctypes.c_uint32
-        fun=lib.ppr_path32
-    elif fun_id == 2:
-        itype=np.int64
-        vtype=np.uint32
-        ctypes_itype=ctypes.c_int64
-        ctypes_vtype=ctypes.c_uint32
-        fun=lib.ppr_path32_64
-    else:
-        print "please specify a C funtion: 0 for ppr_path64, 1 for ppr_path32 and 2 for ppr_path32_64"
+def ppr_path(n,ai,aj,alpha,eps,rho,seedids,nseedids,xlength):
     
     if platform.architecture() == ('64bit', ''):
-        float_type=np.float64
+        float_type = np.float64
     else:
-        float_type=np.float32
+        float_type = np.float32
         
-    #convert edge list to CSR
-    ai=np.zeros(n+1,dtype=itype)
-    aj=np.zeros(edge_num,dtype=vtype)
-    i=0
-    for item in edge_tuples:
-        ai[item[0]+1]=ai[item[0]+1]+1
-        aj[i]=item[1]
-        i=i+1
-    for i in range(1,n+1):
-        ai[i]=ai[i-1]+ai[i]
-    
+    dt = np.dtype(ai[0])
+    (itype, ctypes_itype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)    
+    dt = np.dtype(aj[0])
+    (vtype, ctypes_vtype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
+
+    #load library
+    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
+
+    if (vtype, itype) == (np.int64, np.int64):
+        fun = lib.ppr_path64
+    elif (vtype, itype) == (np.int32, np.int64):
+        fun = lib.ppr_path32_64
+    else:
+        fun = lib.ppr_path32
+
     #call C function
-    seedids=np.array(seedids,dtype=vtype)
-    xids=np.zeros(xlength,dtype=vtype)
-    fun.restype=ctypes_vtype
-    fun.argtypes=[ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
-                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,ctypes.c_double,ctypes.c_double,ctypes.c_double,
-                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,
-                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype]
-    actual_length=fun(n,ai,aj,0,alpha,eps,rho,seedids,nseedids,xids,xlength)
-    actual_xids=np.empty(actual_length,dtype=vtype)
-    actual_xids[:]=[xids[i] for i in range(actual_length)]
+    seedids = np.array(seedids,dtype=vtype)
+    xids = np.zeros(xlength,dtype=vtype)
+    fun.restype = ctypes_vtype
+    fun.argtypes = [ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
+                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                   ctypes_vtype,ctypes.c_double,ctypes.c_double,ctypes.c_double,
+                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                   ctypes_vtype,
+                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                   ctypes_vtype]
+    print("Calling C function")
+    actual_length = fun(n,ai,aj,0,alpha,eps,rho,seedids,nseedids,xids,xlength)
+    actual_xids = np.empty(actual_length,dtype=vtype)
+    actual_xids[:] = [xids[i] for i in range(actual_length)]
     
     return (actual_length,actual_xids)

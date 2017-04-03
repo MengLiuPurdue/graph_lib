@@ -5,7 +5,6 @@
 # nR - number of nodes in seed set
 # actual_length - number of nodes in the optimal subset
 # ret_set - optimal subset with the smallest conductance
-# fun_id - 0 for MQI64, 1 for MQI32 and 2 for MQI32_64
 
 from operator import itemgetter
 import numpy as np
@@ -13,55 +12,28 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def MQI(n,ei,ej,nR,R,fun_id):
-    #sort edge list
-    edge_tuples=[]
-    edge_num=len(ei)
-    for i in range(0,edge_num):
-        edge_tuples=edge_tuples+[(ei[i],ej[i])]
-    edge_tuples.sort(key=itemgetter(0,1))
-    
-    #load library
-    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
-    
-    #define proper data type
-    if fun_id == 0:
-        itype=np.int64
-        vtype=np.int64
-        ctypes_itype=ctypes.c_int64
-        ctypes_vtype=ctypes.c_int64
-        fun=lib.MQI64
-    elif fun_id == 1:
-        itype=np.uint32
-        vtype=np.uint32
-        ctypes_itype=ctypes.c_uint32
-        ctypes_vtype=ctypes.c_uint32
-        fun=lib.MQI32
-    elif fun_id == 2:
-        itype=np.int64
-        vtype=np.uint32
-        ctypes_itype=ctypes.c_int64
-        ctypes_vtype=ctypes.c_uint32
-        fun=lib.MQI32_64
-    else:
-        print "please specify a C funtion: 0 for aclpagerank64, 1 for aclpagerank32 and 2 for aclpagerank32_64"
+def MQI(n,ai,aj,nR,R):
     
     if platform.architecture() == ('64bit', ''):
         float_type=np.float64
     else:
         float_type=np.float32
-        
-    #convert edge list to CSR
-    ai=np.zeros(n+1,dtype=itype)
-    aj=np.zeros(edge_num,dtype=vtype)
-    i=0
-    for item in edge_tuples:
-        ai[item[0]+1]=ai[item[0]+1]+1
-        aj[i]=item[1]
-        i=i+1
-    for i in range(1,n+1):
-        ai[i]=ai[i-1]+ai[i]
     
+    dt = np.dtype(ai[0])
+    (itype, ctypes_itype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
+    dt = np.dtype(aj[0])
+    (vtype, ctypes_vtype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
+    
+    #load library
+    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
+
+    if (vtype, itype) == (np.int64, np.int64):
+        fun = lib.MQI64
+    elif (vtype, itype) == (np.int32, np.int64):
+        fun = lib.MQI32_64
+    else:
+        fun = lib.MQI32
+
     #call C function
     R=np.array(R,dtype=vtype)
     ret_set=np.zeros(nR,dtype=vtype)
