@@ -1,7 +1,7 @@
 import numpy as np
 from operator import itemgetter
 
-def list_sparse(filename):
+def list_to_CSR(filename):
     edge_tuples=[]
 
     #read data file

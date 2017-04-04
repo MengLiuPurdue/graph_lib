@@ -1,8 +1,8 @@
 from aclpagerank import aclpagerank
-from list_sparse import list_sparse
+from list_to_CSR import list_to_CSR
 import numpy as np
 
-(m,n,ai,aj) = list_sparse("../../graph/Unknown.smat")
+(m,n,ai,aj) = list_to_CSR("../../graph/Unknown.smat")
 
 alpha=0.99
 eps=10**(-7)

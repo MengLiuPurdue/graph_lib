@@ -1,8 +1,8 @@
 from MQI import MQI
-from list_sparse import list_sparse
+from list_to_CSR import list_to_CSR
 import numpy as np
 
-(m,n,ai,aj) = list_sparse("../../graph/minnesota.smat")
+(m,n,ai,aj) = list_to_CSR("../../graph/minnesota.smat")
 
 f = open("../../graph/minnesota_R.smat")
 data = f.read()

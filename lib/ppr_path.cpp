@@ -60,7 +60,7 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
     xlength = bestclus.size();
 
     for(size_t i = 0; i < xlength; ++ i){
-        xids[i] = bestclus[i];
+        xids[i] = bestclus[i] + offset;
     }
 
     return xlength;
