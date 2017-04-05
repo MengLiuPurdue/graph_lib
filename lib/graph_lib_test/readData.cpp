@@ -87,4 +87,52 @@ void readList(const char* filename, vtype* m, itype* n, vtype** ei, vtype** ej, 
     ss.str("");
 }
 
+template<typename vtype, typename itype>
+void read_and_convert(const char* filename, vtype* nverts, itype* nedges, 
+        itype** ret_ai, vtype** ret_aj, double** ret_a)
+{
+    vtype* ei = NULL;
+    vtype* ej = NULL;
+    double* w = NULL;
+    vtype m = 0;
+    itype n = 0;
+    cout << "read data file" << endl;
+    readList<vtype, itype>(filename, &m, &n, &ei, &ej, &w);
+    cout << "read data file, done!" << endl;
+    itype* ai = (itype*)malloc(sizeof(itype) * (m + 1));
+    vtype* aj = (vtype*)malloc(sizeof(vtype) * n);
+    double* a = (double*)malloc(sizeof(double) * n);
+    cout << "convert edge list to CSR" << endl;
+    list_to_CSR<vtype, itype>(m, n, ei, ej, w, ai, aj, a);
+    cout << "convert edge list to CSR, done! " << m << " " << ai[1] << endl;
+    free(ei);
+    free(ej);
+    free(w);
+
+    *nverts = m;
+    *nedges = n;
+    *ret_ai = ai;
+    *ret_aj = aj;
+    *ret_a = a;
+}
+
+template<typename vtype, typename itype>
+void read_seed(const char* filename, vtype* n, vtype** ids)
+{
+    char* read_file = readSMAT(filename);
+    stringstream ss;
+    ss << read_file;
+    free(read_file);
+    vtype nseedids;
+    ss >> nseedids;
+    vtype* seedids = (vtype*)malloc(sizeof(vtype) * nseedids);
+    for(size_t i = 0; i < nseedids; i ++){
+       ss >> seedids[i];
+    }
+    ss.str("");
+
+    *n = nseedids;
+    *ids = seedids;
+}
+
 #endif

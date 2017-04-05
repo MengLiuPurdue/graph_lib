@@ -14,5 +14,12 @@ void list_to_CSR(vtype m, itype n, vtype* ei, vtype* ej, double* w,
 
 char* readSMAT(const char* filename);
 
+template<typename vtype, typename itype>
+void read_and_convert(const char* filename, vtype* nverts, itype* nedges,
+                      itype** ret_ai, vtype** ret_aj, double** ret_a);
+
+template<typename vtype, typename itype>
+void read_seed(const char* filename, vtype* n, vtype** ids);
+
 #include "../graph_lib_test/readData.cpp"
 #endif

@@ -20,38 +20,19 @@ int main()
     cout << "test MQI on file minnesota.smat with 0 offset" << endl;
 
     //Read and convert data
-    int64_t* ei = NULL;
-    int64_t* ej = NULL;
-    double* w = NULL;
-    int64_t m = 0;
-    int64_t n = 0;
-    string filename = "../../graph/minnesota.smat";
-    cout << "read data file" << endl;
-    readList<int64_t, int64_t>(filename.c_str(), &m, &n, &ei, &ej, &w);
-    cout << "read data file, done!" << endl;
-    int64_t* ai = (int64_t*)malloc(sizeof(int64_t) * (m + 1));
-    int64_t* aj = (int64_t*)malloc(sizeof(int64_t) * n);
-    double* a = (double*)malloc(sizeof(double) * n);
-    cout << "convert edge list to CSR" << endl;
-    list_to_CSR<int64_t, int64_t>(m, n, ei, ej, w, ai, aj, a);
-    cout << "convert edge list to CSR, done!" << endl;
-    free(ei);
-    free(ej);
-    free(w);
+    string filename;
+    filename = "../../graph/minnesota.smat";
+    int64_t m = 0, n = 0;
+    int64_t* ai = NULL, *aj = NULL;
+    double* a = NULL;
+    read_and_convert<int64_t, int64_t>(filename.c_str(), &m, &n, &ai, &aj, &a);
 
     //Read seed
     filename = "../../graph/minnesota_R.smat";
-    char* read_file = readSMAT(filename.c_str());
     stringstream ss;
-    ss << read_file;
-    free(read_file);
-    int64_t nR;
-    ss >> nR;
-    int64_t* R = (int64_t*)malloc(sizeof(int64_t) * nR);
-    for(size_t i = 0; i < nR; i ++){
-       ss >> R[i];
-    }
-    ss.str("");
+    int64_t nR = 0;
+    int64_t* R = NULL;
+    read_seed<int64_t, int64_t>(filename.c_str(), &nR, &R);
 	int64_t* ret_set = (int64_t*)malloc(sizeof(int64_t)*nR);
 
     //Begin calling C function
@@ -70,7 +51,7 @@ int main()
     //Check the output
     cout << "compare the output with correct results" << endl;
     filename = "correct_output/MQI/minnesota_results.smat";
-    read_file = readSMAT(filename.c_str());
+    char* read_file = readSMAT(filename.c_str());
     ss << read_file;
     free(read_file);
     int64_t correct_length;
