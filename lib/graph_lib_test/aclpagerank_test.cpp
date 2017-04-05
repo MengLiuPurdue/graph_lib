@@ -9,7 +9,7 @@ using namespace std;
 
 int main()
 {
-    cout << "test on file Unknown.smat with 0 offset" << endl;
+    cout << "test aclpagerank on file Unknown.smat with 0 offset" << endl;
 
     //Read and convert data
     int64_t* ei = NULL;

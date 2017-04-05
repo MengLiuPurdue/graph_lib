@@ -11,7 +11,7 @@ using namespace std;
 
 int main()
 {
-    cout << "test on file usps_3nn.smat with 0 offset" << endl;
+    cout << "test ppr_path on file usps_3nn.smat with 0 offset" << endl;
 
     //Read and convert data
     int64_t* ei = NULL;

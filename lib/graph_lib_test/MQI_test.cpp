@@ -17,7 +17,7 @@ using namespace std;
 
 int main()
 {
-    cout << "test on file minnesota.smat with offset 0" << endl;
+    cout << "test MQI on file minnesota.smat with 0 offset" << endl;
 
     //Read and convert data
     int64_t* ei = NULL;
@@ -54,7 +54,8 @@ int main()
     ss.str("");
 	int64_t* ret_set = (int64_t*)malloc(sizeof(int64_t)*nR);
 
-    //Begain calling C function
+    //Begin calling C function
+    cout << "calling C function" << endl;
     int64_t actual_length = MQI64(m, nR, ai, aj, 0, R, ret_set);
     cout << "output set" << endl;
     for(int i = 0; i < actual_length; i ++){

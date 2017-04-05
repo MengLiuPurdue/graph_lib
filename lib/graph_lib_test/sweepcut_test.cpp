@@ -8,7 +8,7 @@ using namespace std;
 
 int main()
 {
-    cout << "test on file minnesota.smat with 0 offset" << endl;
+    cout << "test sweepcut on file minnesota.smat with 0 offset" << endl;
 
     //Read and convert data
     int64_t* ei = NULL;
