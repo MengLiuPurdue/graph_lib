@@ -13,8 +13,8 @@ LIB := libgraph.$(SHAREDLIB_EXT)
 CC := $(CXX)
 CXXFLAGS := -std=c++11 -Wall -O3 -Wshadow -fPIC
 
-SWEEPCUT_SRCS = ../sweepcut.cpp sweepcut_test.cpp
-ACLPAGERANK_SRCS = ../aclpagerank.cpp aclpagerank_test.cpp 
+SWEEPCUT_SRCS = ../sweepcut.cpp sweepcut_test.cpp readData.cpp
+ACLPAGERANK_SRCS = ../aclpagerank.cpp aclpagerank_test.cpp readData.cpp
 MQI_SRCS = ../MQI.cpp MQI_test.cpp ../maxflow.cpp ../MQI_c_interface.cpp readData.cpp
 PPR_PATH_SRCS = ../ppr_path.cpp ppr_path_test.cpp ../ppr_path_c_interface.cpp readData.cpp
 SWEEPCUT_OBJS = $(SWEEPCUT_SRCS:%.cpp=%.o)

@@ -34,6 +34,7 @@ template<typename vtype, typename itype>
 void list_to_CSR(vtype m, itype n, vtype* ei, vtype* ej, double* w, 
         itype* ai, vtype* aj, double* a)
 {
+    fill(ai, ai + m + 1, 0);
     edge<vtype>* edge_list = (edge<vtype>*)malloc(sizeof(edge<vtype>) * n);
     for(itype i = 0; i < n; i ++){
         edge_list[i].u = ei[i];
@@ -41,7 +42,6 @@ void list_to_CSR(vtype m, itype n, vtype* ei, vtype* ej, double* w,
         edge_list[i].w = w[i];
     }
     sort(edge_list, edge_list + n, myobject<vtype>);
-    ai[0] = 0;
     for(itype i = 0; i < n; i ++){
         ai[edge_list[i].u + 1] ++;
         aj[i] = edge_list[i].v;
@@ -50,6 +50,7 @@ void list_to_CSR(vtype m, itype n, vtype* ei, vtype* ej, double* w,
     for(vtype i = 1; i <= m; i ++){
         ai[i] += ai[i-1];
     }
+    free(edge_list);
 }
 
 char* readSMAT(const char* filename)

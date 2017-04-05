@@ -42,7 +42,7 @@ int main()
     int64_t nseedids;
     ss >> nseedids;
     int64_t* seedids = (int64_t*)malloc(sizeof(int64_t) * nseedids);
-i    for(size_t i = 0; i < nseedids; i ++){
+    for(size_t i = 0; i < nseedids; i ++){
        ss >> seedids[i];
     }
     ss.str("");
@@ -50,7 +50,7 @@ i    for(size_t i = 0; i < nseedids; i ++){
 	double eps = 0.0001;
 	int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*m);
 
-    //Begain calling C function
+    //Begin calling C function
     cout << "calling C function" << endl;
 	int64_t actual_length = ppr_path64(m,ai,aj,0,alpha,eps,0.0,seedids,nseedids,xids,m);
 

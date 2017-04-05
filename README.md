@@ -58,16 +58,15 @@ The first three functions will sort "ids" based on the decreasing order of "valu
  * xids, xlength - the solution vector
 
 ## Usage
-Inside the lib/graph\_lib\_test folder, use
+Inside the lib/graph\_lib\_test folder, use the following command to create the dynamic library and all the executable files,
 	
 	make
 	
-to create the dynamic library and all the executable files, use
+use the following command to run all the tests,
 
-	make test
+	python test_all.py
 	
-to run all the build-in examples, use
+use the following command to delete all the generated files,
 
 	make clean
 	
-to delete all the generated files.
