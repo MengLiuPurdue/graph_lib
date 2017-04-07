@@ -104,7 +104,7 @@ void read_and_convert(const char* filename, vtype* nverts, itype* nedges,
     double* a = (double*)malloc(sizeof(double) * n);
     cout << "convert edge list to CSR" << endl;
     list_to_CSR<vtype, itype>(m, n, ei, ej, w, ai, aj, a);
-    cout << "convert edge list to CSR, done! " << m << " " << ai[1] << endl;
+    cout << "convert edge list to CSR, done! " << endl;
     free(ei);
     free(ej);
     free(w);

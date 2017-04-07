@@ -1,26 +1,26 @@
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
-#include "../include/aclpagerank.h"
-#include "../include/aclpagerank_c_interface.h"
+#include "../include/aclpagerank_weighted.h"
+#include "../include/aclpagerank_weighted_c_interface.h"
 #include "../include/readData.hpp"
 
 using namespace std;
 
 int main()
 {
-    cout << "test aclpagerank on file Unknown.smat with 0 offset" << endl;
+    cout << "test aclpagerank on file minnesota_weighted.smat with 0 offset" << endl;
 
     //Read and convert data
     string filename;
-    filename = "../../graph/Unknown.smat";
+    filename = "../../graph/minnesota_weighted.smat";
     int64_t m = 0, n = 0;
     int64_t* ai = NULL, *aj = NULL;
     double* a = NULL;
     read_and_convert<int64_t, int64_t>(filename.c_str(), &m, &n, &ai, &aj, &a);
     
     //Read seed
-    filename = "../../graph/Unknown_seed.smat";
+    filename = "../../graph/minnesota_weighted_seed.smat";
     stringstream ss;
     int64_t nseedids = 0;
     int64_t* seedids = NULL;
@@ -34,7 +34,7 @@ int main()
 
     //Begin calling C function
     cout << "calling C function " << endl;
-	int64_t actual_length = aclpagerank64(m,ai,aj,0,alpha,eps,seedids,
+	int64_t actual_length = aclpagerank_weighted64(m,ai,aj,a,0,alpha,eps,seedids,
             nseedids,maxstep,xids,xlength,values);
 	cout << "actual length" << endl;
     cout<<actual_length<<endl;
@@ -54,7 +54,7 @@ int main()
 
     //Check the output
     cout << "compare the output with correct results" << endl;
-    filename = "correct_output/aclpagerank/Unknown_set.smat";
+    filename = "correct_output/aclpagerank_weighted/minnesota_weighted_set.smat";
     char* read_file = readSMAT(filename.c_str());
     ss << read_file;
     free(read_file);
@@ -65,7 +65,8 @@ int main()
         ss >> correct_xids[i];
     }
     ss.str("");
-    filename = "correct_output/aclpagerank/Unknown_values.smat";
+
+    filename = "correct_output/aclpagerank_weighted/minnesota_weighted_values.smat";
     read_file = readSMAT(filename.c_str());
     ss << read_file;
     free(read_file);
@@ -82,14 +83,14 @@ int main()
     }
     else{
         for(size_t i = 0; i < correct_length; i ++){
-            if(xids[i] != correct_xids[i] || fabs(values[i] - correct_values[i]) > pow(10, -5)){
-                cout << "output is not correct!" << endl;
+            if(xids[i] == correct_xids[i] && fabs(values[i] - correct_values[i]) > pow(10, -5)){
+                cout << "output is not correct! " << endl;
                 return EXIT_FAILURE;
             }
         }
     }
     cout << "output is correct!" << endl;
-    free(correct_xids);
+    //free(correct_xids);
     free(correct_values);
     free(values);
     free(xids);
