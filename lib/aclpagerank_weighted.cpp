@@ -219,6 +219,7 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
     delete r_map;
     delete x_map;
     delete Q;
+    free(degrees);
 
     return map_size;
 }
