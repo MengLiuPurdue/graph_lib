@@ -1,4 +1,4 @@
-# A julia wrapper for aclpagerank
+# A julia wrapper for weighted aclpagerank
 # A - sparse matrix representation of graph
 # alpha - value of alpha
 # eps - value of epsilon
@@ -7,18 +7,18 @@
 # xlength - the max number of ids in the solution vector
 # xids, actual_length - the solution vector
 # values - the pagerank value vector for xids (already sorted in decreasing order)
-function aclpagerank{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
+function aclpagerank_weighted{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
                           eps::Float64,seedids,maxsteps,xlength)
     n=A.n;
     offset=1;
-    xids=zeros(Int64,xlength);
-    values=zeros(Cdouble,xlength);
+    xids=zeros(Int64,n);
+    values=zeros(Cdouble,n);
     seedsize=size(seedids)
     nseedids=seedsize[1]
-    actual_length=ccall((:aclpagerank64,"../../lib/graph_lib_test/libgraph"),Int64,
-        (Int64,Ptr{Int64},Ptr{Int64},Int64,Cdouble,Cdouble,
+    actual_length=ccall((:aclpagerank_weighted64,"../../lib/graph_lib_test/libgraph"),Int64,
+        (Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Int64,Cdouble,Cdouble,
         Ptr{Int64},Int64,Int64,Ptr{Int64},Int64,Ptr{Cdouble}),n,A.colptr,
-        A.rowval,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values);   
+        A.rowval,A.nzval,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values);   
     values=values[1:actual_length];
     xids=xids[1:actual_length];
     return actual_length,xids,values

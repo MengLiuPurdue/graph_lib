@@ -1,5 +1,6 @@
 import numpy as np
 from operator import itemgetter
+import platform
 
 def list_to_CSR(filename):
     edge_tuples=[]
@@ -29,7 +30,7 @@ def list_to_CSR(filename):
     print("sort edge list")
     edge_tuples=[]
     for i in range(0,m):
-        edge_tuples=edge_tuples+[(ei[i],ej[i])]
+        edge_tuples=edge_tuples+[(ei[i],ej[i],w[i])]
     
     edge_tuples.sort(key=itemgetter(0,1))
     print("sort edge list, done!")
@@ -40,15 +41,21 @@ def list_to_CSR(filename):
 
     #convert edge list to CSR
     print("convert list to CSR")
+    if platform.architecture() == ('64bit', ''):
+        float_type = np.float64
+    else:
+        float_type = np.float32
     ai = np.zeros(n+1,dtype=itype)
     aj = np.zeros(m,dtype=vtype)
+    a = np.zeros(m,dtype=float_type)
     i=0
     for item in edge_tuples:
         ai[item[0]+1]=ai[item[0]+1]+1
         aj[i]=item[1]
+        a[i]=item[2]
         i=i+1
     for i in range(1,n+1):
         ai[i]=ai[i-1]+ai[i]
     print("convert list to CSR, done!")
 
-    return (m,n,ai,aj)
+    return (m,n,ai,aj,a)

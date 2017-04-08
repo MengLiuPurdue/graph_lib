@@ -7,9 +7,10 @@
 % values - A vector scoring each vertex (e.g. pagerank value). 
 %          This will be sorted and turned into one of the other inputs.
 % fun_id - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
-function [actual_length,results]=sweepcut(A,ids,num,values,fun_id)
+function [actual_length,results]=sweepcut(A,ids,values,fun_id)
 [ajPtr,aiPtr,~]=sparse_arrays_ptr(A);
 [n,~]=size(A);
+[num,~]=size(ids);
 switch computer
     case {'PCWIN64','GLNXA64','MACI64'}
         indtype = 'int64Ptr';

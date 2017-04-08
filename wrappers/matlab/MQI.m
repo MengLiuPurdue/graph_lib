@@ -8,7 +8,7 @@
 function [actual_length,ret_set]=MQI(A,R)
 [ajPtr,aiPtr,~]=sparse_arrays_ptr(A);
 [n,~]=size(A);
-[~,nR]=size(R);
+[nR,~]=size(R);
 switch computer
     case {'PCWIN64','GLNXA64','MACI64'}
         indtype = 'int64Ptr';

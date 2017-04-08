@@ -1,12 +1,13 @@
 # A julia wrapper for MQI
 # A - sparse matrix representation of graph
-# n - number of nodes in the graph
 # R - seed set
-# nR - number of nodes in seed set
 # actual_length - number of nodes in the optimal subset
 # ret_set - optimal subset with the smallest conductance
-function MQI{T}(A::SparseMatrixCSC{T,Int64},n,nR,R)
+function MQI{T}(A::SparseMatrixCSC{T,Int64},R)
+    Rsize=size(R)
+    nR=Rsize[1]
     ret_set=zeros(Int64,nR);
+    n=A.n
     offset = 1;
     actual_length=ccall((:MQI64,"../../lib/graph_lib_test/libgraph"),Int64,
                         (Int64,Int64,Ptr{Int64},Ptr{Int64},Int64,Ptr{Int64},Ptr{Int64}),n,nR,A.colptr,

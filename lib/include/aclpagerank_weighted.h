@@ -12,7 +12,7 @@ struct sparserow{
 };
 
 template<typename vtype, typename itype>
-vtype pprgrow(sparserow<vtype, itype>* r, double alpha, double eps, 
+vtype pprgrow_weighted(sparserow<vtype, itype>* r, double alpha, double eps, 
                 vtype* seedids, vtype nseedids, vtype maxsteps, 
                 vtype* xids, vtype xlength, double* values);
 

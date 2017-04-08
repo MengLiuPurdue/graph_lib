@@ -15,7 +15,7 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def aclpagerank(n,ai,aj,alpha,eps,seedids,nseedids,maxsteps,xlength,flag):
+def aclpagerank_weighted(n,ai,aj,a,alpha,eps,seedids,nseedids,maxsteps,xlength,offset):
 
     if platform.architecture() == ('64bit', ''):
         float_type = np.float64
@@ -31,11 +31,11 @@ def aclpagerank(n,ai,aj,alpha,eps,seedids,nseedids,maxsteps,xlength,flag):
     lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
     
     if (vtype, itype) == (np.int64, np.int64):
-        fun = lib.aclpagerank64
+        fun = lib.aclpagerank_weighted64
     elif (vtype, itype) == (np.int32, np.int64):
-        fun = lib.aclpagerank32_64
+        fun = lib.aclpagerank_weighted32_64
     else:
-        fun = lib.aclpagerank32
+        fun = lib.aclpagerank_weighted32
 
     #call C function
     seedids=np.array(seedids,dtype=vtype)
@@ -44,12 +44,13 @@ def aclpagerank(n,ai,aj,alpha,eps,seedids,nseedids,maxsteps,xlength,flag):
     fun.restype=ctypes_vtype
     fun.argtypes=[ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                  ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ctypes_vtype,ctypes.c_double,ctypes.c_double,
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                   ctypes_vtype,ctypes_vtype,
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                   ctypes_vtype,ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
-    actual_length=fun(n,ai,aj,flag,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values)
+    actual_length=fun(n,ai,aj,a,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values)
     actual_values=np.empty(actual_length,dtype=float_type)
     actual_xids=np.empty(actual_length,dtype=vtype)
     actual_values[:]=[values[i] for i in range(actual_length)]

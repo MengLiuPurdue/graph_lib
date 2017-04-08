@@ -3,7 +3,7 @@ function readSMAT(filename::AbstractString)
     A = sparse(
                convert(Array{Int64,1},rows[1:parse(Int,header[3]),1])+1, 
                convert(Array{Int64,1},rows[1:parse(Int,header[3]),2])+1, 
-               convert(Array{Int64,1},rows[1:parse(Int,header[3]),3]),
+               convert(Array{Float64,1},rows[1:parse(Int,header[3]),3]),
                parse(Int,header[1]), 
                parse(Int,header[2])
                )

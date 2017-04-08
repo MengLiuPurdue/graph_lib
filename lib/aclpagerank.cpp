@@ -56,7 +56,7 @@ int64_t aclpagerank64(
         int64_t maxsteps,
         int64_t* xids, int64_t xlength, double* values)
 {
-    int64_t actual_length = aclpagerank <int64_t, int64_t> (n, ai, aj, offset, alpha, 
+    int64_t actual_length = aclpagerank <int64_t, int64_t> (n, ai, aj, offset, alpha,
                                                    eps, seedids, nseedids, maxsteps, 
                                                    xids, xlength, values);
     return actual_length;
@@ -111,8 +111,8 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
     typename unordered_map<vtype, double>::const_iterator x_iter, r_iter;
     queue<vtype> Q;
     for(int i = 0; i < nseedids; i ++){
-        r_map[seedids[i]] = 1;
-        x_map[seedids[i]] = 0;
+        r_map[seedids[i] - rows->offset] = 1;
+        x_map[seedids[i] - rows->offset] = 0;
     }
     for(r_iter = r_map.begin(); r_iter != r_map.end(); ++r_iter){
         if(r_iter->second >= eps * get_degree<vtype>(rows, r_iter->first)){
@@ -175,7 +175,7 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
         map_size = xlength;
     }
     for(j = 0; j < map_size; j ++){
-        xids[j] = possible_nodes[j].first;
+        xids[j] = possible_nodes[j].first + rows->offset;
         values[j] = possible_nodes[j].second;
     }
     

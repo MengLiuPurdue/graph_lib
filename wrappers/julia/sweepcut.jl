@@ -6,17 +6,20 @@
 # num - the number of vertices given
 # values - A vector scoring each vertex (e.g. pagerank value). 
 #          This will be sorted and turned into one of the other inputs.
-# fun_id - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
-function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,num,n,values,fun_id)
+# flag - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
+function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag)
     offset=1;
-    results=zeros(Int64,num);
-    if fun_id == 1
-        actual_length=ccall((:sweepcut_without_sorting64,"libgraph"),Int64,(Ptr{Int64},
-                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),ids,results,num,n,A.colptr,
+    n=A.n
+    idsize=size(ids)
+    nids=idsize[1]
+    results=zeros(Int64,nids);
+    if flag == 1
+        actual_length=ccall((:sweepcut_without_sorting64,"../../lib/graph_lib_test/libgraph"),Int64,(Ptr{Int64},
+                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),ids,results,nids,n,A.colptr,
                 A.rowval,offset);
-    elseif fun_id == 0
-        actual_length=ccall((:sweepcut_with_sorting64,"libgraph"),Int64,(Ptr{Cdouble},Ptr{Int64},
-                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),values,ids,results,num,n,A.colptr,
+    elseif flag == 0
+        actual_length=ccall((:sweepcut_with_sorting64,"../../lib/graph_lib_test/libgraph"),Int64,(Ptr{Cdouble},Ptr{Int64},
+                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),values,ids,results,nids,n,A.colptr,
                 A.rowval,offset);
     else
         error("Please specify your function (0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting)");

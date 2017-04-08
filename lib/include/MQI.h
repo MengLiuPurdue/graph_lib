@@ -30,11 +30,11 @@ pair<double, vtype> max_flow(itype* ai, vtype* aj, vtype offset, double a, doubl
                              vtype src, vtype dest, vtype* mincut);
 
 template<typename vtype, typename itype>
-pair<itype, itype> get_stats(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map, vtype nR);
+pair<itype, itype> get_stats(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>& R_map, vtype nR);
 
 template<typename vtype, typename itype>
-void build_map(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map, 
-        unordered_map<vtype, vtype>* degree_map, vtype* R, vtype nR);
+void build_map(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>& R_map, 
+        unordered_map<vtype, vtype>& degree_map, vtype& R, vtype nR);
 
 
 #include "../maxflow.cpp"

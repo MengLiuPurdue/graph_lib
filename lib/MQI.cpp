@@ -12,23 +12,23 @@ using namespace std;
 
 
     template<typename vtype, typename itype>
-void build_map(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map,
-        unordered_map<vtype, vtype>* degree_map, vtype* R, vtype nR)
+void build_map(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>& R_map,
+        unordered_map<vtype, vtype>& degree_map, vtype* R, vtype nR)
 {
     vtype deg;
     for(vtype i = 0; i < nR; i ++){
-        (*R_map)[R[i] - offset] = i;
+        R_map[R[i] - offset] = i;
     }
-    for(auto iter = (*R_map).begin(); iter != (*R_map).end(); ++iter){
+    for(auto iter = R_map.begin(); iter != R_map.end(); ++iter){
         vtype u = iter->first;
         deg = get_degree<vtype, itype>(ai, u);
         for(vtype j = ai[u] - offset; j < ai[u+1] - offset; j ++){
             vtype v = aj[j] - offset;
-            if((*R_map).count(v) > 0){
+            if(R_map.count(v) > 0){
                 deg --;
             }
         }
-        (*degree_map)[u] = deg;
+        degree_map[u] = deg;
     }
 }
 
@@ -55,12 +55,12 @@ vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype
     vtype total_iter = 0;
     unordered_map<vtype, vtype> R_map;
     unordered_map<vtype, vtype> degree_map;
-    build_map<vtype, itype>(ai, aj, offset, &R_map, &degree_map, R, nR);
+    build_map<vtype, itype>(ai, aj, offset, R_map, degree_map, R, nR);
     itype nedges = 0;
     double condOld = 1;
     double condNew;
     itype total_degree = ai[n] - offset;
-    pair<itype, itype> set_stats = get_stats<vtype, itype>(ai, aj, offset, &R_map, nR);
+    pair<itype, itype> set_stats = get_stats<vtype, itype>(ai, aj, offset, R_map, nR);
     itype curvol = set_stats.first;
     itype curcutsize = set_stats.second;
     nedges = curvol - curcutsize + 2 * nR;
@@ -89,8 +89,8 @@ vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype
         condOld = condNew;
         R_map.clear();
         degree_map.clear();
-        build_map<vtype, itype>(ai, aj, offset, &R_map, &degree_map, Rnew, nRnew);
-        set_stats = get_stats<vtype, itype>(ai, aj, offset, &R_map, nRnew);
+        build_map<vtype, itype>(ai, aj, offset, R_map, degree_map, Rnew, nRnew);
+        set_stats = get_stats<vtype, itype>(ai, aj, offset, R_map, nRnew);
         curvol = set_stats.first;
         curcutsize = set_stats.second;
         nedges = curvol - curcutsize + 2 * nRnew;
@@ -116,16 +116,16 @@ vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype
 }
 
     template<typename vtype, typename itype>
-pair<itype, itype> get_stats(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>* R_map, vtype nR)
+pair<itype, itype> get_stats(itype* ai, vtype* aj, vtype offset, unordered_map<vtype, vtype>& R_map, vtype nR)
 {
     itype curvol = 0;
     itype curcutsize = 0;
-    for(auto R_iter = (*R_map).begin(); R_iter != (*R_map).end(); ++ R_iter){
+    for(auto R_iter = R_map.begin(); R_iter != R_map.end(); ++ R_iter){
         vtype v = R_iter->first;
         itype deg = get_degree<vtype, itype>(ai, v);
         curvol += deg;
         for(itype j = ai[v] - offset; j < ai[v + 1] - offset; j ++){
-            if((*R_map).count(aj[j] - offset) == 0){
+            if(R_map.count(aj[j] - offset) == 0){
                 curcutsize ++;
             }
         }

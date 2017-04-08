@@ -58,7 +58,7 @@ int64_t aclpagerank_weighted64(
         int64_t maxsteps,
         int64_t* xids, int64_t xlength, double* values)
 {
-    int64_t actual_length = aclpagerank_weighted <int64_t, int64_t> (n, ai, aj, a, offset, alpha, 
+    int64_t actual_length = aclpagerank_weighted <int64_t, int64_t> (n, ai, aj, a, offset, alpha,
                                                    eps, seedids, nseedids, maxsteps, 
                                                    xids, xlength, values);
     return actual_length;
@@ -97,7 +97,7 @@ vtype aclpagerank_weighted(
     r.a = a;
     r.offset = offset;
     vtype actual_length;
-    actual_length=pprgrow<vtype, itype>(&r, alpha, eps, seedids, 
+    actual_length=pprgrow_weighted<vtype, itype>(&r, alpha, eps, seedids,
                                    nseedids, maxsteps, xids, 
                                    xlength, values);
 
@@ -118,7 +118,7 @@ double get_weight(sparserow<vtype, itype>* rows, vtype u, vtype v)
 
 
 template<typename vtype, typename itype>
-vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps, 
+vtype pprgrow_weighted(sparserow<vtype, itype>* rows, double alpha, double eps,
                 vtype* seedids, vtype nseedids, vtype maxsteps, 
                 vtype* xids, vtype xlength, double* values)
 {
@@ -185,13 +185,6 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
             }
         }
         steps_count ++;
-        /*sum_iter = 0;
-        for(r_iter = r_map->begin(); r_iter != r_map->end(); ++r_iter){
-            sum_iter += r_iter->second;
-        }
-        for(x_iter = x_map->begin(); x_iter != x_map->end(); ++x_iter){
-            sum_iter += x_iter->second;
-        }*/
         //cout << "step: " << steps_count << " sum_iter: " << sum_iter << endl;
     }
     vtype map_size = x_map.size();
@@ -209,12 +202,8 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
         map_size = xlength;
     }
     for(j = 0; j < map_size; j ++){
-        xids[j] = possible_nodes[j].first;
+        xids[j] = possible_nodes[j].first + rows->offset;
         values[j] = possible_nodes[j].second;
-    }
-    double sum = 0;
-    for(size_t l = 0; l < map_size; l ++){
-        sum += values[l];
     }
     
     delete [] possible_nodes;
