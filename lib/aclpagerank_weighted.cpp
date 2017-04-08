@@ -26,6 +26,7 @@ values - the pagerank value vector for xids (already sorted in decreasing order)
 #include <algorithm>
 #include <stdint.h>
 #include <numeric>
+#include <vector>
 
 #include "include/aclpagerank_weighted.h"
 #include "include/aclpagerank_weighted_c_interface.h"
@@ -121,7 +122,8 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
                 vtype* seedids, vtype nseedids, vtype maxsteps, 
                 vtype* xids, vtype xlength, double* values)
 {
-    double* degrees = (double*)malloc(sizeof(double) * rows->m);
+    vector<double> vdegree(rows->m);
+    double* degrees = &vdegree[0];
     for(size_t i = 0; i < rows->m; i ++){
         double degree = 0;
         for(size_t j = rows->ai[i] - rows->offset; j < rows->ai[i+1] - rows->offset; j ++){
@@ -129,74 +131,74 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
         }
         degrees[i] = degree;
     }
-    unordered_map<vtype, double>* x_map = new unordered_map<vtype, double>;
-    unordered_map<vtype, double>* r_map = new unordered_map<vtype, double>;
+    unordered_map<vtype, double> x_map;
+    unordered_map<vtype, double> r_map;
     typename unordered_map<vtype, double>::const_iterator x_iter, r_iter;
-    queue<vtype>* Q = new queue<vtype>;
+    queue<vtype> Q;
     for(int i = 0; i < nseedids; i ++){
-        (*r_map)[seedids[i] - rows->offset] = 1;
-        (*x_map)[seedids[i] - rows->offset] = 0;
+        r_map[seedids[i] - rows->offset] = 1;
+        x_map[seedids[i] - rows->offset] = 0;
     }
-    for(r_iter = r_map->begin(); r_iter != r_map->end(); ++r_iter){
+    for(r_iter = r_map.begin(); r_iter != r_map.end(); ++r_iter){
         if(r_iter->second >= eps * degrees[r_iter->first]){
-            Q->push(r_iter->first);
+            Q.push(r_iter->first);
         }
     }
     vtype steps_count = 0;
     vtype j;
     double xj, rj, delta, pushval;
-    double sum_iter;
-    while(Q->size()>0 && steps_count<maxsteps){
-        j = Q->front();
-        Q->pop();
-        x_iter = x_map->find(j);
-        r_iter = r_map->find(j);
+    //double sum_iter;
+    while(Q.size()>0 && steps_count<maxsteps){
+        j = Q.front();
+        Q.pop();
+        x_iter = x_map.find(j);
+        r_iter = r_map.find(j);
         rj = r_iter->second;
         pushval = rj - eps * degrees[j] * 0.5;
-        if(x_iter == x_map->end()){
+        if(x_iter == x_map.end()){
             xj = (1-alpha)*pushval;
-            (*x_map)[j] = xj;
+            x_map[j] = xj;
         }
         else{
             xj = x_iter->second + (1-alpha)*pushval;
-            x_map->at(j) = xj;
+            x_map.at(j) = xj;
         }
         delta = alpha * pushval / degrees[j];
-        r_map->at(j) = rj - pushval;
+        r_map.at(j) = rj - pushval;
         vtype u;
         double ru_new, ru_old;
         for(itype i = rows->ai[j] - rows->offset; i < rows->ai[j+1] - rows->offset; i++){
             u = rows->aj[i] - rows->offset;
-            r_iter = r_map->find(u);
-            if(r_iter == r_map->end()){
+            r_iter = r_map.find(u);
+            if(r_iter == r_map.end()){
                 ru_old = 0;
                 ru_new = rows->a[i] * delta;
-                (*r_map)[u] = ru_new;
+                r_map[u] = ru_new;
             }
             else{
                 ru_old = r_iter->second;
                 ru_new = rows->a[i] * delta + ru_old;
-                r_map->at(u) = ru_new;
+                r_map.at(u) = ru_new;
             }
             if(ru_new > eps * degrees[u] && ru_old <= eps * degrees[u]){
-                Q->push(u);
+                Q.push(u);
             }
         }
         steps_count ++;
-        sum_iter = 0;
+        /*sum_iter = 0;
         for(r_iter = r_map->begin(); r_iter != r_map->end(); ++r_iter){
             sum_iter += r_iter->second;
         }
         for(x_iter = x_map->begin(); x_iter != x_map->end(); ++x_iter){
             sum_iter += x_iter->second;
-        }
+        }*/
         //cout << "step: " << steps_count << " sum_iter: " << sum_iter << endl;
     }
-    vtype map_size = x_map->size();
+    vtype map_size = x_map.size();
     //cout << "size " << map_size << endl;
     pair <vtype, double>* possible_nodes = new pair <vtype, double>[map_size];
     int i = 0;
-    for(x_iter = x_map->begin(); x_iter != x_map->end(); ++x_iter){
+    for(x_iter = x_map.begin(); x_iter != x_map.end(); ++x_iter){
         possible_nodes[i].first = x_iter->first;
         possible_nodes[i].second = x_iter->second;
         i++;
@@ -216,10 +218,6 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
     }
     
     delete [] possible_nodes;
-    delete r_map;
-    delete x_map;
-    delete Q;
-    free(degrees);
 
     return map_size;
 }

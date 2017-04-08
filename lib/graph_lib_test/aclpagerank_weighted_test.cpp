@@ -26,7 +26,7 @@ int main()
     int64_t* seedids = NULL;
     read_seed<int64_t, int64_t>(filename.c_str(), &nseedids, &seedids);
 	double alpha = 0.99;
-	double eps = pow(10,-7);
+	double eps = pow(10,-10);
     int64_t xlength = 100;
     int64_t maxstep = (size_t)1/(eps*(1-alpha));
 	int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*m);
@@ -83,7 +83,7 @@ int main()
     }
     else{
         for(size_t i = 0; i < correct_length; i ++){
-            if(xids[i] == correct_xids[i] && fabs(values[i] - correct_values[i]) > pow(10, -5)){
+            if(xids[i] != correct_xids[i] || fabs(values[i] - correct_values[i]) > pow(10, -5)){
                 cout << "output is not correct! " << endl;
                 return EXIT_FAILURE;
             }

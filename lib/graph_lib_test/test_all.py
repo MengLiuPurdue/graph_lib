@@ -14,11 +14,14 @@ size = size + 1
 result = call(["./ppr_path"])
 test_results = test_results + [("ppr_path", result)]
 size = size + 1
+result = call(["./aclpagerank_weighted"])
+test_results = test_results + [("aclpagerank_weighted", result)]
+size = size + 1
 print("\n\ntest summary:")
 for i in range(size):
     result = test_results[i]
     if result[1] == 0:
-        print('{0:20s} {1:40s}'.format(result[0],"pass"))
+        print('{0:30s} {1:10s}'.format(result[0],"pass"))
     else:
-        print('{0:20s} {1:40s}'.format(result[0],"fail"))
+        print('{0:30s} {1:10s}'.format(result[0],"fail"))
 
