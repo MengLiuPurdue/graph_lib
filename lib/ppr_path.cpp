@@ -89,7 +89,6 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
         ret_rank_results.val_of_push[i] = rkrecord.val_of_push[i];
         ret_rank_results.global_bcond[i] = rkrecord.global_bcond[i];
     }
-
     return xlength;
 }
 
