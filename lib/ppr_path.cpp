@@ -1,3 +1,5 @@
+#include "include/ppr_path_c_interface.h"
+
 #ifdef PPR_PATH_HPP
 
 #include <stdio.h>
@@ -33,7 +35,7 @@ using namespace std;
 template<typename vtype, typename itype>
 vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
         double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength)
+        vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
 {
     cout << "preprocessing start: " << endl;
     sparserow<vtype, itype> r;
@@ -47,13 +49,13 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
     copy_array_to_index_vector<vtype, itype>(seedids, seedset, nseedids, offset);
     cout << "preprocessing end: " << endl;
 
-    eps_info<vtype> ep_stats(1000);
+    eps_info<vtype> eps_stats(1000);
     rank_record<vtype> rkrecord;
     vector<vtype> bestclus;
 
     cout << "call to hypercluster_graphdiff() start" << endl;
 
-    hypercluster_graphdiff_multiple<vtype, itype>(&r, seedset, alpha, eps, rho, ep_stats, rkrecord, bestclus);
+    hypercluster_graphdiff_multiple<vtype, itype>(&r, seedset, alpha, eps, rho, eps_stats, rkrecord, bestclus);
 
     cout << "call to hypercluster_graphdiff() DONE" << endl;
 
@@ -61,6 +63,31 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
 
     for(size_t i = 0; i < xlength; ++ i){
         xids[i] = bestclus[i] + offset;
+    }
+    
+    *(ret_path_results.num_eps) = eps_stats.num_epsilons;
+    for(size_t i = 0; i < eps_stats.num_epsilons; i ++){
+        ret_path_results.epsilon[i] = eps_stats.epsilons[i];
+        ret_path_results.conds[i] = eps_stats.conds[i];
+        ret_path_results.cuts[i] = eps_stats.cuts[i];
+        ret_path_results.vols[i] = eps_stats.vols[i];
+        ret_path_results.setsizes[i] = eps_stats.setsizes[i];
+        ret_path_results.stepnums[i] = eps_stats.stepnums[i];
+    }
+    
+    *(ret_rank_results.nrank_changes) = rkrecord.nrank_changes;
+    *(ret_rank_results.nrank_inserts) = rkrecord.nrank_inserts;
+    *(ret_rank_results.nsteps) = rkrecord.nsteps;
+    *(ret_rank_results.size_for_best_cond) = rkrecord.size_for_best_cond;
+    for(size_t i = 0; i < rkrecord.nsteps; i ++){
+        ret_rank_results.starts[i] = rkrecord.starts[i];
+        ret_rank_results.ends[i] = rkrecord.ends[i];
+        ret_rank_results.nodes[i] = rkrecord.nodes[i];
+        ret_rank_results.deg_of_pushed[i] = rkrecord.deg_of_pushed[i];
+        ret_rank_results.size_of_solvec[i] = rkrecord.size_of_solvec[i];
+        ret_rank_results.size_of_r[i] = rkrecord.size_of_r[i];
+        ret_rank_results.val_of_push[i] = rkrecord.val_of_push[i];
+        ret_rank_results.global_bcond[i] = rkrecord.global_bcond[i];
     }
 
     return xlength;

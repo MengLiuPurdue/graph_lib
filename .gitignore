@@ -13,3 +13,4 @@
 *.o
 *.dylib
 *.DS_Store
+*.m~

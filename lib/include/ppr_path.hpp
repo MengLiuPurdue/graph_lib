@@ -23,7 +23,7 @@ struct sparserow{
 template<typename vtype, typename itype>
 vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
                double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids,
-               vtype xlength, double* values, int flag);
+               vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results);
 
 template<typename vtype>
 struct sweep_info {
@@ -129,7 +129,7 @@ struct rank_map{
 template<typename vtype, typename itype>
 vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
         double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength);
+        vtype xlength, double** ret_eps_results);
 
 template<typename vtype, typename itype>
 bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
