@@ -64,7 +64,6 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
     for(size_t i = 0; i < xlength; ++ i){
         xids[i] = bestclus[i] + offset;
     }
-    
     *(ret_path_results.num_eps) = eps_stats.num_epsilons;
     for(size_t i = 0; i < eps_stats.num_epsilons; i ++){
         ret_path_results.epsilon[i] = eps_stats.epsilons[i];
