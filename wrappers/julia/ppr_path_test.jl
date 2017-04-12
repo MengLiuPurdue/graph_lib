@@ -8,6 +8,6 @@ eps = 0.0001
 rho = 0.1
 seedids = [7576]
 xlength=A.n
-(actual_length,xids)=ppr_path(A,alpha,eps,rho,seedids,xlength)
+(actual_length,xids,ret_eps_stats,ret_rank_stats)=ppr_path(A,alpha,eps,rho,seedids,xlength)
 @show actual_length
 @show xids
