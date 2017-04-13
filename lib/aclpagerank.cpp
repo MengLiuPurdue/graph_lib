@@ -1,22 +1,38 @@
-/*
-aclpagerank with C interface
-
-ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
-
-alpha - value of alpha
-
-eps - value of epsilon
-
-seedids,nseedids - the set of indices for seeds
-
-maxsteps - the max number of steps
-
-xlength - the max number of ids in the solution vector
-
-xids, actual_length - the solution vector
-
-values - the pagerank value vector for xids (already sorted in decreasing order)
-*/
+/**
+ * aclpagerank with C interface. It takes an unweighted and undirected graph with CSR representation
+ * and some seed vetrices as input and output the approximate pagerank vector. Choose different C interface 
+ * based on the data type of your input.
+ *
+ * INPUT:
+ *     n        - the number of vertices in the graph
+ *     ai,aj    - Compressed sparse row representation
+ *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     seedids  - the set of indices for seeds
+ *     nseedids - the number of indices in the seeds
+ *     maxsteps - the max number of steps
+ *     xlength  - the max number of ids in the solution vector
+ *     xids     - the solution vector, i.e. the vertices with nonzero pagerank value
+ *     values   - the pagerank value vector for xids (already sorted in decreasing order)
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the solution vector
+ *
+ * COMPILE:
+ *     make aclpagerank
+ *
+ * EXAMPLE:
+ *     Use functions from readData.hpp to read a graph and seed from files.
+ *     int64_t xlength = 100;
+ *     double alpha = 0.99;
+ *     double eps = pow(10,-7);
+ *     int64_t maxstep = (size_t)1/(eps*(1-alpha));
+ *     int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*m);
+ *     double* values = (double*)malloc(sizeof(double)*m);
+ *     int64_t actual_length =  aclpagerank64(m,ai,aj,0,alpha,eps,seedids,
+ *                                            nseedids,maxstep,xids,xlength,values);
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +50,9 @@ using namespace std;
 template<typename vtype>
 bool myobject (pair <vtype, double> i, pair <vtype, double> j) { return (i.second>j.second);}
 
+/**
+ * A C interface for aclpagerank.
+ */
 uint32_t aclpagerank32(
         uint32_t n, uint32_t* ai, uint32_t* aj, uint32_t offset, 
         double alpha, 
@@ -48,6 +67,9 @@ uint32_t aclpagerank32(
     return actual_length;
 }
 
+/**
+ * A C interface for aclpagerank.
+ */
 int64_t aclpagerank64(
         int64_t n, int64_t* ai, int64_t* aj, int64_t offset, 
         double alpha, 
@@ -62,6 +84,9 @@ int64_t aclpagerank64(
     return actual_length;
 }
 
+/**
+ * A C interface for aclpagerank.
+ */
 uint32_t aclpagerank32_64(
         uint32_t n, int64_t* ai, uint32_t* aj, uint32_t offset, 
         double alpha, 
@@ -76,16 +101,17 @@ uint32_t aclpagerank32_64(
    return actual_length;
 }
 
+/**
+ * aclpagerank template function
+ */
 template<typename vtype, typename itype>
 vtype aclpagerank(
         vtype n, itype* ai, vtype* aj, vtype offset,
-            //Compressed sparse row representation, with offset for
-            //zero based (matlab) or one based arrays (julia)
-        double alpha,    //value of alpha
-        double eps,    //value of epsilon
-        vtype* seedids, vtype nseedids,    //the set indices for seeds
-        vtype maxsteps,    //the maximum number of steps
-        vtype* xids, vtype xlength, double* values) //the solution vector
+        double alpha,
+        double eps,
+        vtype* seedids, vtype nseedids,
+        vtype maxsteps,
+        vtype* xids, vtype xlength, double* values) 
 {
     sparserow<vtype, itype> r;
     r.m = n;
@@ -101,6 +127,23 @@ vtype aclpagerank(
     return actual_length;
 }
 
+/** 
+ * pprgrow compute the approximate pagerank vector locally.
+ *
+ * INUPUT:
+ *     rows     - a self defined struct which contains all the info of a CSR based graph
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     seedids  - the set of indices for seeds
+ *     nseedids - the number of indices in the seeds
+ *     maxsteps - the max number of steps
+ *     xlength  - the max number of ids in the solution vector
+ *     xids     - the solution vector, i.e. the vertices with nonzero pagerank value
+ *     values   - the pagerank value vector for xids (already sorted in decreasing order)
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the solution vector
+ */
 template<typename vtype, typename itype>
 vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps, 
                 vtype* seedids, vtype nseedids, vtype maxsteps, 

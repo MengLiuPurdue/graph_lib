@@ -1,22 +1,38 @@
-/*
-aclpagerank with C interface
-
-ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
-
-alpha - value of alpha
-
-eps - value of epsilon
-
-seedids,nseedids - the set of indices for seeds
-
-maxsteps - the max number of steps
-
-xlength - the max number of ids in the solution vector
-
-xids, actual_length - the solution vector
-
-values - the pagerank value vector for xids (already sorted in decreasing order)
-*/
+/**
+ * weighted aclpagerank with C interface. It takes a weighted and undirected graph with CSR representation 
+ * and some seed vetrices as input and output the approximate pagerank vector. Choose different C 
+ * interface based on the data type of your input.
+ *
+ * INPUT:
+ *     n        - the number of vertices in the graph
+ *     ai,aj,a  - Compressed sparse row representation
+ *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     seedids  - the set of indices for seeds
+ *     nseedids - the number of indices in the seeds
+ *     maxsteps - the max number of steps
+ *     xlength  - the max number of ids in the solution vector
+ *     xids     - the solution vector, i.e. the vertices with nonzero pagerank value
+ *     values   - the pagerank value vector for xids (already sorted in decreasing order)
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the solution vector
+ *
+ * COMPILE:
+ *     make aclpagerank_weighted
+ *
+ * EXAMPLE:
+ *     Use functions from readData.hpp to read a graph and seed from files.
+ *     int64_t xlength = 100;
+ *     double alpha = 0.99;
+ *     double eps = pow(10,-7);
+ *     int64_t maxstep = (size_t)1/(eps*(1-alpha));
+ *     int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*m);
+ *     double* values = (double*)malloc(sizeof(double)*m);
+ *     int64_t actual_length =  aclpagerank_weighted64(m,ai,aj,a,0,alpha,eps,seedids,
+ *                                            nseedids,maxstep,xids,xlength,values);
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,14 +226,4 @@ vtype pprgrow_weighted(sparserow<vtype, itype>* rows, double alpha, double eps,
 
     return map_size;
 }
-
-/*template<typename vtype,typename itype>
-double get_degree(sparserow<vtype, itype>* rows, vtype id)
-{
-    double degree = 0;
-    for(itype i = rows->ai[id] - rows->offset; i < rows->ai[id + 1] - rows->offset; i ++){
-        degree += rows->a[i];
-    }
-    return degree;
-}*/
 

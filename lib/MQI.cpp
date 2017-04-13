@@ -1,3 +1,29 @@
+/**
+ * This is an implementation of the MQI algorithm from Lang and Rao (2004). 
+ * The goal is to find the best subset of a seed set with the smallest conductance.
+ *
+ * INPUT:
+ *     n        - the number of vertices in the graph
+ *     ai,aj    - Compressed sparse row representation
+ *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
+ *     R        - the seed set
+ *     nR       - number of nodes in the original seed set
+ *     ret_set  - the best cluster with the smallest conductance.
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the best set with the lowest conductance
+ *
+ * COMPILE:
+ *     make MQI
+ *
+ * EXAMPLE:
+ *     Use functions from readData.hpp to read a graph and seed from files.
+ *     int64_t* ret_set = (int64_t*)malloc(sizeof(int64_t) * nR);
+ *     int64_t offset = 0;
+ *     int64_t actual_length = MQI64(m, nR, ai, aj, offset, R, ret_set);
+ */
+
+
 #ifdef MQI_H
 
 #include <iostream>
@@ -39,16 +65,6 @@ vtype get_degree(itype* ai, vtype id)
     return ai[id + 1] - ai[id];
 }
 
-/*
- * This is an implementation of the MQI algorithm from Lang and Rao (2004). 
- * The goal is to find the best subset of a seed set with the smallest conductance.
- * n - number of nodes in the graph
- * nR - number of nodes in the original seed set
- * ai,aj,offset - the CSR representation of graph with offset for zero based (matlab) and one based arrays (julia)
- * R - the seed set
- * ret_set - the best subset
- * actual_length - the number of nodes in ret_set
- */
     template<typename vtype, typename itype>
 vtype MQI(vtype n, vtype nR, itype* ai, vtype* aj, vtype offset, vtype* R, vtype* ret_set)
 {

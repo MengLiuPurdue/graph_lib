@@ -1,36 +1,32 @@
-/*
-sweep cut procedure with C interface
-
-ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
-
-ids - the order of vertices given
-
-results - the best set with the smallest conductance
-
-actual_length - the number of vertices in the best set
-
-num - the number of vertices given
-
-values - A vector scoring each vertex (e.g. pagerank value). This will be sorted and turned into one of the other inputs.
-
-This interface contains 6 functions :
-
-sweepcut\_with\_sorting64
-
-sweepcut\_with\_sorting32 
-
-sweepcut\_with\_sorting32_64
-
-sweepcut\_without\_sorting64
-
-sweepcut\_without\_sorting32 
-
-sweepcut\_without\_sorting32_64
-
-"64" means all data is in 64bit, "32" means all data is in 32bit and "32_64" means "ai" is in 64bit while the others are in 32bit.
-
-The first three functions will sort "ids" based on the decreasing order of "values", while the other three don't have this step.
-*/
+/**
+ * A sweepcut procedure with C interface. It takes a set of indices and a CSR based graph as the input. 
+ * Then it outputs the best cluster with the lowest conductance by using sweepcut algorithm. This file
+ * implements two kinds of sweepcut procedure. The first one will first sort the given vertices in the 
+ * dereasing order of the pagerank value. The second one will not.
+ *
+ * INPUT:
+ *     n        - the number of vertices in the graph
+ *     ai,aj    - Compressed sparse row representation
+ *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     ids      - the order of vertices given
+ *     results  - the best set with the smallest conductance
+ *     num      - the number of vertices given
+ *     values   - A vector scoring each vertex (e.g. pagerank value).
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the best set with the lowest conductance
+ *
+ * COMPILE:
+ *     make sweepcut
+ *
+ * EXAMPLE:
+ *     Use functions from readData.hpp to read a graph and seed from files.
+ *     int64_t* bestclus = (int64_t*)malloc(sizeof(int64_t) * nids);
+ *     int64_t offset = 0;
+ *     int64_t actual_length = sweepcut_without_sorting64(ids, bestclus, nids, m, ai, aj, offset);
+ */
 
 
 #include <stdio.h>
@@ -86,7 +82,22 @@ uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* resu
     return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, offset);
 } 
 
-
+/**
+ * The sweepcut procedure which will first sort the given vertices in the 
+ * dereasing order of the pagerank value.
+ *
+ * INPUT:
+ *     rows     - a self defined struct which contains all the info of a CSR based graph
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     ids      - the order of vertices given
+ *     results  - the best set with the smallest conductance
+ *     num      - the number of vertices given
+ *     values   - A vector scoring each vertex (e.g. pagerank value).
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the best set with the lowest conductance
+ */
 template<typename vtype, typename itype>
 vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num, vtype n,
         itype* ai, vtype* aj, vtype offset)
@@ -111,6 +122,23 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
 
     return actual_length;
 }
+
+/**
+ * The sweepcut procedure which won't sort the given vertices in the 
+ * dereasing order of the pagerank value.
+ *
+ * INPUT:
+ *     rows     - a self defined struct which contains all the info of a CSR based graph
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     ids      - the order of vertices given
+ *     results  - the best set with the smallest conductance
+ *     num      - the number of vertices given
+ *     values   - A vector scoring each vertex (e.g. pagerank value).
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the best set with the lowest conductance
+ */
 
 template<typename vtype, typename itype>
 vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, vtype n,

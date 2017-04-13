@@ -1,3 +1,67 @@
+/**
+ * Implement a seeded ppr clustering scheme that finds
+ * the best cluster for all tolerances eps in an interval.
+ * Returns information about solution vector, residual,
+ * and best cluster at every push step, and every
+ * new value of epsilon reached.
+ *
+ * INPUT:
+ *     n        - the number of vertices in the graph
+ *     ai,aj    - Compressed sparse row representation
+ *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
+ *     alpha    - value of alpha
+ *     eps      - value of epsilon
+ *     rho      - value of rho
+ *     seedids  - the set of indices for seeds
+ *     nseedids - the number of indices in the seeds
+ *     maxsteps - the max number of steps
+ *     xlength  - the max number of ids in the solution vector
+ *     xids     - the solution vector, i.e. the vertices with nonzero pagerank value
+ *     values   - the pagerank value vector for xids (already sorted in decreasing order)
+ *     ret_path_results - the path results under every different epsilon
+ *     ret_rank_results - the rank results after each step of queue update
+ *
+ * OUTPUT:
+ *     actual_length - the number of nonzero entries in the solution vector
+ *
+ * COMPILE:
+ *     make ppr_path
+ *
+ * EXAMPLE:
+ *     Use functions from readData.hpp to read a graph and seed from files.
+ *     double alpha = 0.99;
+ *     double eps = 0.0001;
+ *     double rho = 0.1;
+ *     int64_t max_step = (int64_t)1 / ((1 - alpha) * eps);
+ *     int64_t* xids = (int64_t*)malloc(sizeof(int64_t)*m);
+ *     int64_t num_eps = 0;
+ *     double* epsilon = (double*)malloc(sizeof(double) * max_step);
+ *     double* conds = (double*)malloc(sizeof(double) * max_step);
+ *     double* cuts = (double*)malloc(sizeof(double) * max_step);
+ *     double* vols = (double*)malloc(sizeof(double) * max_step);
+ *     int64_t* setsizes = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* stepnums = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     struct path_info ret_path_results = {.num_eps = &num_eps, .epsilon = epsilon,
+ *     .conds = conds, .cuts = cuts, .vols = vols, .setsizes = setsizes, .stepnums = stepnums};
+ *
+ *     int64_t nrank_changes = 0, nrank_inserts = 0, nsteps = 0, size_for_best_cond = 0;
+ *     int64_t* starts = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* ends = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* nodes = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* deg_of_pushed = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* size_of_solvec = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     int64_t* size_of_r = (int64_t*)malloc(sizeof(int64_t) * max_step);
+ *     double* val_of_push = (double*)malloc(sizeof(double) * max_step);
+ *     double* global_bcond = (double*)malloc(sizeof(double) * max_step);
+ *     struct rank_info ret_rank_results = {.starts = starts, .ends = ends, .nodes = nodes,
+ *     .deg_of_pushed = deg_of_pushed, .size_of_solvec = size_of_solvec, .size_of_r = size_of_r,
+ *     .val_of_push = val_of_push, .global_bcond = global_bcond, .nrank_changes = &nrank_changes,
+ *     .nrank_inserts = &nrank_inserts, .nsteps = &nsteps, .size_for_best_cond = &size_for_best_cond};
+ *
+ *     int64_t actual_length = ppr_path64(m,ai,aj,0,alpha,eps,rho,seedids,nseedids,xids,m,
+ *     ret_path_results,ret_rank_results);
+ */
+
 #include "include/ppr_path_c_interface.h"
 
 #ifdef PPR_PATH_HPP
