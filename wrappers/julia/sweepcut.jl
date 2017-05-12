@@ -17,11 +17,11 @@ function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag)
     nids=idsize[1]
     results=zeros(Int64,nids);
     if flag == 1
-        actual_length=ccall((:sweepcut_without_sorting64,"../../lib/graph_lib_test/libgraph"),Int64,(Ptr{Int64},
+        actual_length=ccall((:sweepcut_without_sorting64,libgraph),Int64,(Ptr{Int64},
                 Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),ids,results,nids,n,A.colptr,
                 A.rowval,offset);
     elseif flag == 0
-        actual_length=ccall((:sweepcut_with_sorting64,"../../lib/graph_lib_test/libgraph"),Int64,(Ptr{Cdouble},Ptr{Int64},
+        actual_length=ccall((:sweepcut_with_sorting64,libgraph),Int64,(Ptr{Cdouble},Ptr{Int64},
                 Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),values,ids,results,nids,n,A.colptr,
                 A.rowval,offset);
     else

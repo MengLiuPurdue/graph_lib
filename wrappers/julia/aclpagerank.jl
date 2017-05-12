@@ -18,7 +18,7 @@ function aclpagerank{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
     values=zeros(Cdouble,xlength);
     seedsize=size(seedids)
     nseedids=seedsize[1]
-    actual_length=ccall((:aclpagerank64,"../../lib/graph_lib_test/libgraph"),Int64,
+    actual_length=ccall((:aclpagerank64,libgraph),Int64,
         (Int64,Ptr{Int64},Ptr{Int64},Int64,Cdouble,Cdouble,
         Ptr{Int64},Int64,Int64,Ptr{Int64},Int64,Ptr{Cdouble}),n,A.colptr,
         A.rowval,offset,alpha,eps,seedids,nseedids,maxsteps,xids,xlength,values);
