@@ -8,10 +8,11 @@
  *     offset   - offset for zero based arrays (matlab) or one based arrays (julia)
  *     R        - the seed set
  *     nR       - number of nodes in the original seed set
- *     ret_set  - the best cluster with the smallest conductance.
+ *     ret_set  - preallocated memmory the best cluster with the smallest conductance.
  *
  * OUTPUT:
  *     actual_length - the number of nonzero entries in the best set with the lowest conductance
+ *     ret_set       - the best cluster with the smallest conductance.
  *
  * COMPILE:
  *     make MQI

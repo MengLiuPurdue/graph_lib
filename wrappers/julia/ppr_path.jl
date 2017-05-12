@@ -55,6 +55,8 @@ type ret_rank_info
   size_for_best_cond
 end
 
+const libgraph = joinpath(dirname(@Base.__FILE__),"..","..","lib","graph_lib_test","libgraph")
+
 function ppr_path{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
                           eps::Float64,rho::Float64,seedids,xlength)
     offset = 1;
@@ -88,7 +90,7 @@ function ppr_path{T}(A::SparseMatrixCSC{T,Int64},alpha::Float64,
     rank_stats=rank_info(pointer(starts),pointer(ends),pointer(nodes),pointer(deg_of_pushed),
                              pointer(size_of_solvec),pointer(size_of_r),pointer(val_of_push),pointer(global_bcond),pointer(nrank_changes),
                              pointer(nrank_inserts),pointer(nsteps),pointer(size_for_best_cond))
-    actual_length=ccall((:ppr_path64,"../../lib/graph_lib_test/libgraph"),Int64,
+    actual_length=ccall((:ppr_path64,libgraph),Int64,
                         (Int64,Ptr{Int64},Ptr{Int64},Int64,Cdouble,Cdouble,Cdouble,
                         Ptr{Int64},Int64,Ptr{Int64},Int64,path_info,rank_info),n,A.colptr,A.rowval,
                         offset,alpha,eps,rho,seedids,nseedids,xids,xlength,eps_stats,rank_stats);

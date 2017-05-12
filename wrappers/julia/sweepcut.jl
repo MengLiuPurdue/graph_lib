@@ -4,9 +4,12 @@
 # results - the best set with the smallest conductance
 # actual_length - the number of vertices in the best set
 # num - the number of vertices given
-# values - A vector scoring each vertex (e.g. pagerank value). 
+# values - A vector scoring each vertex (e.g. pagerank value).
 #          This will be sorted and turned into one of the other inputs.
 # flag - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
+
+const libgraph = joinpath(dirname(@Base.__FILE__),"..","..","lib","graph_lib_test","libgraph")
+
 function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag)
     offset=1;
     n=A.n
