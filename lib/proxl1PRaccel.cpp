@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <stdint.h>
 #include <cmath>
+#include <vector>
 
 #include "include/proxl1PRaccel_c_interface.h"
 
@@ -39,58 +40,44 @@ double find_max(double* grad, double* ds, vtype n){
 }
 
     template<typename vtype, typename itype>
-void update_grad(double* grad, double* y, double* c, itype* ai, vtype* aj, double* a,
-                 vtype n, double alpha)
+void update_grad(double* grad, vector<double> y, vector<double> c, itype* ai, vtype* aj, double* a,
+                 vtype n, double alpha, double* dsinv)
 {
-    double* temp = new double[n]();
-    double* temp1 = new double[n]();
     for(vtype i = 0; i < n; i ++){
-        for(itype j = ai[i]; j < ai[i+1]; j ++){
-            temp[i] += a[j]*y[aj[j]];
-            temp1[aj[j]] += a[j]*y[i];
-        }
-        
+        grad[i] = (1+alpha)/2*y[i] - c[i];
     }
     for(vtype i = 0; i < n; i ++){
-        grad[i] = (1+alpha)/2*y[i] - (temp[i]+temp1[i])/2 - c[i];
+        for(itype j = ai[i]; j < ai[i+1]; j ++){
+            grad[i] -= a[j] * y[aj[j]] * dsinv[i] * dsinv[aj[j]] * (1-alpha)/2 * 0.5;
+            grad[aj[j]] -= a[j] * y[i] * dsinv[i] * dsinv[aj[j]] * (1-alpha)/2 * 0.5;
+        }
+        
     }
 }
 
     template<typename vtype, typename itype>
 vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, double rho,
-                    vtype* v, vtype v_num, double* d, double epsilon, double* grad, double* p,
-                    vtype maxiter)
+                    vtype* v, vtype v_num, double* d, double* ds, double* dsinv, double epsilon,
+                    double* grad, double* p, vtype maxiter)
 {
-    double* ds = new double[n];
-    double* dsinv = new double[n];
-    vtype not_converged = 0;
-    for(vtype i = 0; i < n; i ++){
-        ds[i] = sqrt(d[i]);
-        dsinv[i] = 1/ds[i];
-    }
-    
     /*cout << "dsinv" << endl;
     for(vtype i = 0; i < n; i ++){
         cout << dsinv[i] << endl;
     }*/
     
-    for(vtype i = 0; i < n; i ++){
-        for(itype j = ai[i]; j < ai[i+1]; j ++){
-            a[j] = a[j] * dsinv[i] * dsinv[aj[j]] * (1-alpha)/2;
-        }
-    }
     /*cout << "a" << endl;
     for(vtype i = 0; i < 8; i ++){
         cout << a[i] << endl;
     }*/
-    double* c = new double[n]();
+    vtype not_converged = 0;
+    vector<double> c (n,0);
     for(vtype i = 0; i < v_num; i ++){
         grad[v[i]] = -1 * alpha / ds[v[i]];
         c[v[i]] = -1 * grad[v[i]];
     }
-    double* q = new double[n]();
-    double* q_old = new double[n]();
-    double* y = new double[n]();
+    vector<double> q (n,0);
+    vector<double> q_old (n,0);
+    vector<double> y (n,0);
     double z;
     size_t iter = 0;
     double thd = (1 + epsilon) * rho * alpha;
@@ -121,7 +108,7 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
         for(vtype i = 0; i < n; i ++){
             y[i] = q[i] + betak*(q[i]-q_old[i]);
         }
-        update_grad(grad,y,c,ai,aj,a,n,alpha);
+        update_grad(grad,y,c,ai,aj,a,n,alpha,dsinv);
         
         /*if(iter == 1){
             cout << "y" << endl;
@@ -150,27 +137,27 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
     for(vtype i = 0; i < n; i ++){
         p[i] = q[i]*ds[i];
     }
-    
     return not_converged;
 }
 
 uint32_t proxl1PRaccel32(uint32_t n, uint32_t* ai, uint32_t* aj, double* a, double alpha,
-                         double rho, uint32_t* v, uint32_t v_num, double* d, double epsilon,
-                         double* grad, double* p, uint32_t maxiter)
+                         double rho, uint32_t* v, uint32_t v_num, double* d, double* ds,
+                         double* dsinv, double epsilon, double* grad, double* p, uint32_t maxiter)
 {
-    return proxl1PRaccel<uint32_t,uint32_t>(n,ai,aj,a,alpha,rho,v,v_num,d,epsilon,grad,p,maxiter);
+    return proxl1PRaccel<uint32_t,uint32_t>(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,grad,p,maxiter);
 }
 
 int64_t proxl1PRaccel64(int64_t n, int64_t* ai, int64_t* aj, double* a, double alpha,
-                        double rho, int64_t* v, int64_t v_num, double* d, double epsilon,
-                        double* grad, double* p, int64_t maxiter)
+                        double rho, int64_t* v, int64_t v_num, double* d, double* ds,
+                        double* dsinv,double epsilon, double* grad, double* p, int64_t maxiter)
 {
-    return proxl1PRaccel<int64_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_num,d,epsilon,grad,p,maxiter);
+    return proxl1PRaccel<int64_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,grad,p,maxiter);
 }
 
 uint32_t proxl1PRaccel32_64(uint32_t n, int64_t* ai, uint32_t* aj, double* a, double alpha,
-                            double rho, uint32_t* v, uint32_t v_num, double* d, double epsilon,
-                            double* grad, double* p, uint32_t maxiter)
+                            double rho, uint32_t* v, uint32_t v_num, double* d, double* ds,
+                            double* dsinv, double epsilon, double* grad, double* p,
+                            uint32_t maxiter)
 {
-    return proxl1PRaccel<uint32_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_num,d,epsilon,grad,p,maxiter);
+    return proxl1PRaccel<uint32_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,grad,p,maxiter);
 }

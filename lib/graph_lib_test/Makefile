@@ -29,7 +29,7 @@ PROXL1PRACCEL_OBJS = $(PROXL1PRACCEL_SRCS:%.cpp=%.o)
 
 LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o ../ppr_path_c_interface.o ../aclpagerank_weighted.o ../proxl1PRaccel.o
 
-all: sweepcut aclpagerank MQI ppr_path aclpagerank_weighted proxl1PRaccel$(LIB)
+all: sweepcut aclpagerank MQI ppr_path aclpagerank_weighted proxl1PRaccel $(LIB)
 
 sweepcut: $(SWEEPCUT_OBJS)
 	$(CC) $(SWEEPCUT_OBJS) -o sweepcut
