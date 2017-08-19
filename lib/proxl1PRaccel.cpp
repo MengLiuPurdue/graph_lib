@@ -8,7 +8,9 @@
  *     d         - vector of node strengths
  *     epsilon   - accuracy for termination criterion
  *     n         - size of A
-
+ *     ds        - the square root of d
+ *     dsinv     - 1/ds
+ *
  * OUTPUT:
  *     p              - PageRank vector as a row vector
  *     not_converged  - flag indicating that maxiter has been reached
