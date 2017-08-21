@@ -2,14 +2,13 @@
  * INPUT:
  *     alpha     - teleportation parameter between 0 and 1
  *     rho       - l1-reg. parameter
- *     v         - seed node
- *     v_num     - number of seed nodes
+ *     ref_node  - seed node
  *     ai,aj,a   - Compressed sparse row representation of A
  *     d         - vector of node strengths
  *     epsilon   - accuracy for termination criterion
- *     n         - size of A
  *     ds        - the square root of d
  *     dsinv     - 1/ds
+ *     maxiter   - max number of iterations
  *
  * OUTPUT:
  *     p              - PageRank vector as a row vector
@@ -24,7 +23,8 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def proxl1PRaccel(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,maxiter):
+def proxl1PRaccel(ai,aj,a,ref_node,d,ds,dsinv,alpha = 0.15,rho = 1.0e-5,epsilon = 1.0e-4,maxiter = 10000,max_time = 100):
+    n = len(ai) - 1
     if platform.architecture() == ('64bit', ''):
         float_type = np.float64
     else:
@@ -52,14 +52,13 @@ def proxl1PRaccel(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,maxiter):
     fun.argtypes=[ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                  ctypes.c_double,ctypes.c_double,
-                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                  ctypes_vtype,ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                  ctypes.c_double,ctypes.c_double,ctypes_vtype,
+                  ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),ctypes.c_double,
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                  ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),ctypes_vtype]
-    not_converged=fun(n,ai,aj,a,alpha,rho,v,v_num,d,ds,dsinv,epsilon,grad,p,maxiter)
+                  ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),ctypes_vtype,ctypes_vtype,ctypes.c_double]
+    not_converged=fun(n,ai,aj,a,alpha,rho,ref_node,d,ds,dsinv,epsilon,grad,p,maxiter,0,max_time)
 
 
     return (not_converged,grad,p)
