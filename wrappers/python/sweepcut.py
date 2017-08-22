@@ -29,18 +29,17 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag):
     #load library
     lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
     
+    print(vtype, itype)
     if (vtype, itype) == (np.int64, np.int64):
         fun = lib.sweepcut_with_sorting64 if flag == 0 else lib.sweepcut_without_sorting64
-    elif (vtype, itype) == (np.int32, np.int64):
+    elif (vtype, itype) == (np.uint32, np.int64):
         fun = lib.sweepcut_with_sorting32_64 if flag == 0 else lib.sweepcut_without_sorting32_64
     else:
         fun = lib.sweepcut_with_sorting32 if flag == 0 else lib.sweepcut_without_sorting32
 
     #call C function
-    np_ids=np.zeros(num,dtype=vtype)
-    for i in range(num):
-        np_ids[i]=ids[i]
-    values=np.zeros(num,dtype=float_type)
+    ids=np.array(ids,dtype=vtype)
+    values=np.array(values,dtype=float_type)
     results=np.zeros(num,dtype=vtype)
     fun.restype=ctypes_vtype
     if flag == 0:
@@ -52,7 +51,7 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag):
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                       ctypes_vtype]
-        actual_length=fun(values,np_ids,results,num,n,ai,aj,a,0)
+        actual_length=fun(values,ids,results,num,n,ai,aj,a,0)
     else:
         fun.argtypes=[ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
@@ -61,7 +60,7 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag):
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                       ctypes_vtype]
-        actual_length=fun(np_ids,results,num,n,ai,aj,a,0)
+        actual_length=fun(ids,results,num,n,ai,aj,a,0)
 
     actual_results=np.empty(actual_length,dtype=vtype)
     actual_results[:]=[results[i] for i in range(actual_length)]
