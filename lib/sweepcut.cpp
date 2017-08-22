@@ -46,40 +46,40 @@ template<typename vtype>
 bool myobject (pair <vtype, double> i, pair <vtype, double> j) { return (i.second>j.second);}
 
 int64_t sweepcut_without_sorting64(int64_t* ids, int64_t* results, int64_t num, 
-        int64_t n, int64_t* ai, int64_t* aj, int64_t offset)
+        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset)
 {
-    return sweepcut_without_sorting<int64_t, int64_t>(ids, results, num, n, ai, aj, offset);
+    return sweepcut_without_sorting<int64_t, int64_t>(ids, results, num, n, ai, aj, a, offset);
 } 
 
 uint32_t sweepcut_without_sorting32(uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, uint32_t* ai, uint32_t* aj, uint32_t offset)
+        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset)
 {
-    return sweepcut_without_sorting<uint32_t, uint32_t>(ids, results, num, n, ai, aj, offset);
+    return sweepcut_without_sorting<uint32_t, uint32_t>(ids, results, num, n, ai, aj, a, offset);
 } 
 
 uint32_t sweepcut_without_sorting32_64(uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, int64_t* ai, uint32_t* aj, uint32_t offset)
+        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset)
 {
-    return sweepcut_without_sorting<uint32_t, int64_t>(ids, results, num, n, ai, aj, offset);
+    return sweepcut_without_sorting<uint32_t, int64_t>(ids, results, num, n, ai, aj, a, offset);
 } 
 
 
 int64_t sweepcut_with_sorting64(double* value, int64_t* ids, int64_t* results, int64_t num, 
-        int64_t n, int64_t* ai, int64_t* aj, int64_t offset)
+        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset)
 {
-    return sweepcut_with_sorting<int64_t, int64_t>(value, ids, results, num, n, ai, aj, offset);
+    return sweepcut_with_sorting<int64_t, int64_t>(value, ids, results, num, n, ai, aj, a, offset);
 } 
 
 uint32_t sweepcut_with_sorting32(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, uint32_t* ai, uint32_t* aj, uint32_t offset)
+        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset)
 {
-    return sweepcut_with_sorting<uint32_t, uint32_t>(value, ids, results, num, n, ai, aj, offset);
+    return sweepcut_with_sorting<uint32_t, uint32_t>(value, ids, results, num, n, ai, aj, a, offset);
 } 
 
 uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, int64_t* ai, uint32_t* aj, uint32_t offset)
+        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset)
 {
-    return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, offset);
+    return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, a, offset);
 } 
 
 /**
@@ -100,7 +100,7 @@ uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* resu
  */
 template<typename vtype, typename itype>
 vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, vtype offset)
+        itype* ai, vtype* aj, double* a, vtype offset)
 {
     pair<vtype, double>* possible_nodes = new pair<vtype, double>[num];
     for(vtype i = 0; i < num; i ++){
@@ -117,6 +117,7 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
     r.n = n;
     r.ai = ai;
     r.aj = aj;
+    r.a = a;
     r.offset = offset;
     vtype actual_length = sweep_cut<vtype, itype>(&r, newids, results, num);
 
@@ -142,13 +143,14 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
 
 template<typename vtype, typename itype>
 vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, vtype offset)
+        itype* ai, vtype* aj, double* a, vtype offset)
 {
     sparserow<vtype, itype> r;
     r.m = n;
     r.n = n;
     r.ai = ai;
     r.aj = aj;
+    r.a = a;
     r.offset = offset;
     vtype actual_length = sweep_cut<vtype, itype>(&r, ids, results, num);
 
@@ -162,11 +164,17 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
     for(vtype i = 0; i < num; i ++){
         rank[ids[i] - rows->offset] = i + 1;
     }
-    itype total_degree = rows->ai[rows->m] - rows->offset;
-    vtype deg, cut_change, neighbor, min_id;
+    itype total_nnz = rows->ai[rows->m] - rows->offset;
+    double total_degree = 0;
+    for(itype i = 0; i < total_nnz; i ++){
+        total_degree += rows->a[i];
+    }
+    //cout << total_degree << endl;
+    double deg, cut_change, neighbor;
+    vtype min_id;
     double cur_cond;
-    vtype curcutsize = 0;
-    itype curvolume = 0;
+    double curcutsize = 0;
+    double curvolume = 0;
     double min_cond = -1;
     for(vtype i = 0; i < num; i ++){
         vtype v = ids[i] - rows->offset;
@@ -175,11 +183,12 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
         for(vtype j = rows->ai[v] - rows->offset; j < rows->ai[v+1] - rows->offset; j ++){
             neighbor = rows->aj[j] - rows->offset;
             if(rank.count(neighbor) > 0 && rank[neighbor] < rank[v]){
-                cut_change -= 2;
+                cut_change -= 2 * rows->a[j];
             }
         }
         curcutsize += cut_change;
         curvolume += deg;
+        //cout << curvolume << endl;
         if(curvolume == 0 || total_degree - curvolume == 0){
             cur_cond = 1;
         }
@@ -189,18 +198,24 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
         if(min_cond == -1 || cur_cond < min_cond){
             min_cond = cur_cond;
             min_id = i;
-        }    
+        }
+        //cout << "i " << v << " min_id " << ids[min_id] << " cur_cond " << cur_cond << " min_cond " << min_cond << endl;
     }
 
     for(vtype j = 0; j <= min_id; j ++){
         results[j] = ids[j];
     }
+    //cout << min_cond << endl;
 
     return min_id + 1;
 }
 
 template<typename vtype,typename itype>
-vtype get_degree(sparserow<vtype, itype>* rows, vtype id)
+double get_degree(sparserow<vtype, itype>* rows, vtype id)
 {
-    return rows->ai[id + 1] - rows->ai[id];
+    double d = 0;
+    for(vtype j = rows->ai[id] - rows->offset; j < rows->ai[id+1] - rows->offset; j ++){
+        d += rows->a[j];
+    }
+    return d;
 }

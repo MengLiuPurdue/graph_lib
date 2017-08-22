@@ -18,12 +18,12 @@ function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag)
     results=zeros(Int64,nids);
     if flag == 1
         actual_length=ccall((:sweepcut_without_sorting64,libgraph),Int64,(Ptr{Int64},
-                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),ids,results,nids,n,A.colptr,
-                A.rowval,offset);
+                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Int64),
+                            ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset);
     elseif flag == 0
         actual_length=ccall((:sweepcut_with_sorting64,libgraph),Int64,(Ptr{Cdouble},Ptr{Int64},
-                Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Int64),values,ids,results,nids,n,A.colptr,
-                A.rowval,offset);
+                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Int64),
+                            values,ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset);
     else
         error("Please specify your function (0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting)");
     end

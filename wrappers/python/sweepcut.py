@@ -14,7 +14,7 @@ from numpy.ctypeslib import ndpointer
 import ctypes
 import platform
 
-def sweepcut(n,ai,aj,ids,num,values,flag):
+def sweepcut(n,ai,aj,a,ids,num,values,flag):
     
     if platform.architecture() == ('64bit', ''):
         float_type = np.float64
@@ -50,16 +50,18 @@ def sweepcut(n,ai,aj,ids,num,values,flag):
                       ctypes_vtype,ctypes_vtype,
                       ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                       ctypes_vtype]
-        actual_length=fun(values,np_ids,results,num,n,ai,aj,0)
+        actual_length=fun(values,np_ids,results,num,n,ai,aj,a,0)
     else:
         fun.argtypes=[ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ctypes_vtype,ctypes_vtype,
                       ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
+                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                       ctypes_vtype]
-        actual_length=fun(np_ids,results,num,n,ai,aj,0)
+        actual_length=fun(np_ids,results,num,n,ai,aj,a,0)
 
     actual_results=np.empty(actual_length,dtype=vtype)
     actual_results[:]=[results[i] for i in range(actual_length)]

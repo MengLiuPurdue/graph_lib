@@ -30,7 +30,7 @@ int main()
     cout << "calling C function" << endl;
     int64_t offset = 0;
     int64_t actual_length = sweepcut_without_sorting64(ids, bestclus, nids,
-                                                       m, ai, aj, offset);
+                                                       m, ai, aj, a, offset);
     cout << "actual length" << endl << actual_length << endl;
     cout << "best set" << endl;
     for(int i = 0; i < actual_length; i ++)

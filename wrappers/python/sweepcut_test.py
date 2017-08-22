@@ -2,7 +2,7 @@ from sweepcut import sweepcut
 from list_to_CSR import list_to_CSR
 import numpy as np
 
-(m,n,ai,aj) = list_to_CSR("../../graph/minnesota.smat")
+(m,n,ai,aj,a) = list_to_CSR("../../graph/minnesota.smat")
 
 f = open("../../graph/minnesota_ids.smat")
 data = f.read()
@@ -15,5 +15,5 @@ f.close()
 
 values=[]
 flag = 1
-(actual_length,bestclus)=sweepcut(n,ai,aj,ids,nids,values,flag)
+(actual_length,bestclus)=sweepcut(n,ai,aj,a,ids,nids,values,flag)
 print actual_length,bestclus
