@@ -29,8 +29,9 @@ int main()
     //Begin calling C function
     cout << "calling C function" << endl;
     int64_t offset = 0;
+    double ret_cond = 0.0;
     int64_t actual_length = sweepcut_without_sorting64(ids, bestclus, nids,
-                                                       m, ai, aj, a, offset);
+                                                       m, ai, aj, a, offset, &ret_cond, NULL);
     cout << "actual length" << endl << actual_length << endl;
     cout << "best set" << endl;
     for(int i = 0; i < actual_length; i ++)

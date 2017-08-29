@@ -8,7 +8,7 @@ aj = np.array([0,3,0,1,3,3,1,3],dtype=np.int64)
 a = np.array([1,1,1,1,1,1,1,1],dtype=np.float64)
 '''
 (m,n,ai,aj,a) = list_to_CSR("../../graph/Unknown_sys.smat")
-ref_node = 100
+ref_node = [100,101]
 d = np.zeros(n,dtype=np.float64)
 ds = np.zeros(n,dtype=np.float64)
 dsinv = np.zeros(n,dtype=np.float64)

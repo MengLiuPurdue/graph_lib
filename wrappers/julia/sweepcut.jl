@@ -10,23 +10,26 @@
 
 const libgraph = joinpath(dirname(@Base.__FILE__),"..","..","lib","graph_lib_test","libgraph")
 
-function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag)
+function sweep_cut{T}(A::SparseMatrixCSC{T,Int64},ids,values,flag,degrees=C_NULL)
     offset=1;
     n=A.n
     idsize=size(ids)
     nids=idsize[1]
     results=zeros(Int64,nids);
+    min_cond=[0.0]
     if flag == 1
         actual_length=ccall((:sweepcut_without_sorting64,libgraph),Int64,(Ptr{Int64},
-                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Int64),
-                            ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset);
+                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},
+                            Int64,Ptr{Cdouble},Ptr{Cdouble}),
+                            ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset,min_cond,degrees);
     elseif flag == 0
         actual_length=ccall((:sweepcut_with_sorting64,libgraph),Int64,(Ptr{Cdouble},Ptr{Int64},
-                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Int64),
-                            values,ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset);
+                            Ptr{Int64},Int64,Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},
+                            Int64,Ptr{Cdouble},Ptr{Cdouble}),
+                            values,ids,results,nids,n,A.colptr,A.rowval,A.nzval,offset,min_cond,degrees);
     else
         error("Please specify your function (0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting)");
     end
     results=results[1:actual_length]
-    return actual_length, results
+    return actual_length, results,min_cond[1]
 end

@@ -60,7 +60,7 @@ void update_grad(double* grad, vector<double> y, vector<double> c, itype* ai, vt
 
     template<typename vtype, typename itype>
 vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, double rho,
-                    vtype v, double* d, double* ds, double* dsinv, double epsilon,
+                    vtype* v, vtype v_nums, double* d, double* ds, double* dsinv, double epsilon,
                     double* grad, double* p, vtype maxiter,vtype offset,double max_time)
 {
     /*cout << "dsinv" << endl;
@@ -75,8 +75,14 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
     clock_t t1,t2;
     vtype not_converged = 0;
     vector<double> c (n,0);
-    grad[v-offset] = -1 * alpha / ds[v-offset];
-    c[v-offset] = -1 * grad[v-offset];
+    for(vtype i = 0; i < v_nums; i ++)
+    {
+        grad[v[i]-offset] = -1 * alpha / (v_nums * ds[v[i]-offset]);
+        c[v[i]-offset] = -1 * grad[v[i]-offset];
+    }
+    /*for(vtype i = 0; i < n; i ++){
+        cout << grad[i] << endl;
+    }*/
     vector<double> q (n,0);
     vector<double> q_old (n,0);
     vector<double> y (n,0);
@@ -92,10 +98,10 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
         for(vtype i = 0; i < n; i ++){
             z = y[i] - grad[i];
             thd1 = rho*alpha*ds[i];
-            if(z > thd1){
+            if(z >= thd1){
                 q[i] = z - thd1;
             }
-            else if(z < -1 * thd1){
+            else if(z <= -1 * thd1){
                 q[i] = z + thd1;
             }
             else{
@@ -112,8 +118,8 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
             y[i] = q[i] + betak*(q[i]-q_old[i]);
         }
         update_grad(grad,y,c,ai,aj,a,n,alpha,dsinv,offset);
-        /*
-        if(iter == 1){
+        
+        /*if(iter == 1){
             cout << "y" << endl;
             for(vtype i = 0; i < n; i ++){
                 cout << y[i] << endl;
@@ -130,14 +136,17 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
             for(vtype i = 0; i < n; i ++){
                 cout << grad[i] << endl;
             }
-        }
-         */
+        }*/
+        
         t2 = clock();
         if(((double)t2 - (double)t1)/double(CLOCKS_PER_SEC) > max_time)
         {
             not_converged = 1;
             return not_converged;
         }
+        /*if(iter == 1){
+            cout << find_max<vtype>(grad,ds,n) << endl;
+        }*/
     }
     
     if(iter >= maxiter){
@@ -145,29 +154,29 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
     }
     
     for(vtype i = 0; i < n; i ++){
-        p[i] = q[i]*ds[i];
+        p[i] = abs(q[i])*ds[i];
     }
     return not_converged;
 }
 
 uint32_t proxl1PRaccel32(uint32_t n, uint32_t* ai, uint32_t* aj, double* a, double alpha,
-                         double rho, uint32_t v, double* d, double* ds,
+                         double rho, uint32_t* v, uint32_t v_nums, double* d, double* ds,
                          double* dsinv, double epsilon, double* grad, double* p, uint32_t maxiter, uint32_t offset,double max_time)
 {
-    return proxl1PRaccel<uint32_t,uint32_t>(n,ai,aj,a,alpha,rho,v,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    return proxl1PRaccel<uint32_t,uint32_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
 }
 
 int64_t proxl1PRaccel64(int64_t n, int64_t* ai, int64_t* aj, double* a, double alpha,
-                        double rho, int64_t v, double* d, double* ds,
+                        double rho, int64_t* v, int64_t v_nums, double* d, double* ds,
                         double* dsinv,double epsilon, double* grad, double* p, int64_t maxiter, int64_t offset,double max_time)
 {
-    return proxl1PRaccel<int64_t,int64_t>(n,ai,aj,a,alpha,rho,v,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    return proxl1PRaccel<int64_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
 }
 
 uint32_t proxl1PRaccel32_64(uint32_t n, int64_t* ai, uint32_t* aj, double* a, double alpha,
-                            double rho, uint32_t v, double* d, double* ds,
+                            double rho, uint32_t* v, uint32_t v_nums, double* d, double* ds,
                             double* dsinv, double epsilon, double* grad, double* p,
                             uint32_t maxiter, uint32_t offset,double max_time)
 {
-    return proxl1PRaccel<uint32_t,int64_t>(n,ai,aj,a,alpha,rho,v,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    return proxl1PRaccel<uint32_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
 }

@@ -46,19 +46,24 @@ def proxl1PRaccel(ai,aj,a,ref_node,d,ds,dsinv,alpha = 0.15,rho = 1.0e-5,epsilon 
         fun = lib.proxl1PRaccel32
 
     #call C function
+    if type(ref_node) is not list:
+        ref_node = np.array([ref_node],dtype = ctypes_vtype)
+    else:
+        ref_node = np.array(ref_node,dtype = ctypes_vtype)
     grad = np.zeros(n,dtype=float_type)
     p = np.zeros(n,dtype=float_type)
     fun.restype=ctypes_vtype
     fun.argtypes=[ctypes_vtype,ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                  ctypes.c_double,ctypes.c_double,ctypes_vtype,
+                  ctypes.c_double,ctypes.c_double,
+                  ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),ctypes_vtype,
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),ctypes.c_double,
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                   ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),ctypes_vtype,ctypes_vtype,ctypes.c_double]
-    not_converged=fun(n,ai,aj,a,alpha,rho,ref_node,d,ds,dsinv,epsilon,grad,p,maxiter,0,max_time)
+    not_converged=fun(n,ai,aj,a,alpha,rho,ref_node,len(ref_node),d,ds,dsinv,epsilon,grad,p,maxiter,0,max_time)
 
 
     return (not_converged,grad,p)

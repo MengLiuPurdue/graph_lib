@@ -15,5 +15,11 @@ f.close()
 
 values=[]
 flag = 1
-(actual_length,bestclus)=sweepcut(n,ai,aj,a,ids,nids,values,flag)
-print actual_length,bestclus
+degrees = [0.0]*n
+for i in range(n):
+    for j in range(ai[i],ai[i+1]):
+        degrees[i] += a[j]
+(actual_length,bestclus,min_cond)=sweepcut(n,ai,aj,a,ids,nids,values,flag,degrees=degrees)
+print actual_length,bestclus,min_cond
+(actual_length,bestclus,min_cond)=sweepcut(n,ai,aj,a,ids,nids,values,flag)
+print actual_length,bestclus,min_cond

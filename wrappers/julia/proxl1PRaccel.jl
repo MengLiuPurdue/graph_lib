@@ -23,10 +23,13 @@ function proxl1PRaccel{T}(A::SparseMatrixCSC{T,Int64},ref_node,d,ds,dsinv;alpha=
     offset=1;
     grad=zeros(Cdouble,n);
     p=zeros(Cdouble,n);
+    if typeof(ref_node) == Int64
+        ref_node = [ref_node]
+    end
     not_converged=ccall((:proxl1PRaccel64,libgraph),Int64,
                         (Int64,Ptr{Int64},Ptr{Int64},Ptr{Cdouble},Cdouble,Cdouble,
-        Int64,Ptr{Cdouble},Ptr{Cdouble},Ptr{Cdouble},Cdouble,Ptr{Cdouble},Ptr{Cdouble},
-        Int64,Int64,Int64),n,A.colptr,
-        A.rowval,A.nzval,alpha,rho,ref_node,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+                         Ptr{Int64},Int64,Ptr{Cdouble},Ptr{Cdouble},Ptr{Cdouble},Cdouble,Ptr{Cdouble},Ptr{Cdouble},
+                         Int64,Int64,Int64),n,A.colptr,A.rowval,A.nzval,alpha,rho,ref_node,length(ref_node),
+                        d,ds,dsinv,epsilon,grad,p,maxiter, offset,max_time);
     return not_converged,grad,p
 end

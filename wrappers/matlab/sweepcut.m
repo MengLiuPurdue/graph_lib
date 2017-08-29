@@ -7,7 +7,9 @@
 % values - A vector scoring each vertex (e.g. pagerank value). 
 %          This will be sorted and turned into one of the other inputs.
 % fun_id - 0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting
-function [actual_length,results]=sweepcut(A,ids,values,fun_id)
+% degrees - user defined degrees, set it to be [] if not provided
+% min_cond - minimum conductance
+function [actual_length,results,min_cond]=sweepcut(A,ids,values,fun_id,degrees)
 [ajPtr,aiPtr,aPtr]=sparse_arrays_ptr(A);
 [n,~]=size(A);
 [num,~]=size(ids);
@@ -24,28 +26,35 @@ results = zeros(num,1);
 resultsPtr = libpointer(indtype,results);
 idsPtr = libpointer(indtype,ids);
 offset=0;
+minCondPtr = libpointer('doublePtr',0.0);
+if isempty(degrees)
+    degreesPtr = libpointer('doublePtr');
+else
+    degreesPtr = libpointer('doublePtr',degrees);
+end
 loadlibrary('../../lib/graph_lib_test/libgraph','../../lib/include/sweepcut_c_interface.h')
 if strcmp(indtype,'int64Ptr')
     if fun_id == 1
         actual_length = calllib('libgraph','sweepcut_without_sorting64',idsPtr,...
-                                resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset);
+                                resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset,minCondPtr,degreesPtr);
     elseif fun_id == 0
         actual_length = calllib('libgraph','sweepcut_with_sorting64',valuesPtr,...
-                                idsPtr,resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset);
+                                idsPtr,resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset,minCondPtr,degreesPtr);
     else
         error('Please specify your function (0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting)');
     end
 else
     if fun_id == 1
         actual_length = calllib('libgraph','sweepcut_without_sorting32',idsPtr,...
-                                resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset);
+                                resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset,minCondPtr,degreesPtr);
     elseif fun_id == 0
         actual_length = calllib('libgraph','sweepcut_with_sorting32',valuesPtr,...
-                                idsPtr,resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset);
+                                idsPtr,resultsPtr,num,n,aiPtr,ajPtr,aPtr,offset,minCondPtr,degreesPtr);
     else
         error('Please specify your function (0 for sweepcut_with_sorting and 1 for sweepcut_without_sorting)');
     end
 end    
 results = get(resultsPtr,'Value');
 results = results(1:actual_length);
+min_cond = get(minCondPtr,'Value');
 unloadlibrary libgraph;

@@ -14,6 +14,8 @@
  *     results  - the best set with the smallest conductance
  *     num      - the number of vertices given
  *     values   - A vector scoring each vertex (e.g. pagerank value).
+ *     ret_cond - minimum conductance
+ *     degrees  - optional user defined degrees, set it to be NULL if not provided
  *
  * OUTPUT:
  *     actual_length - the number of nonzero entries in the best set with the lowest conductance
@@ -46,40 +48,46 @@ template<typename vtype>
 bool myobject (pair <vtype, double> i, pair <vtype, double> j) { return (i.second>j.second);}
 
 int64_t sweepcut_without_sorting64(int64_t* ids, int64_t* results, int64_t num, 
-        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset)
+        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<int64_t, int64_t>(ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_without_sorting<int64_t, int64_t>(ids, results, num, n, ai, aj, a,
+                                                      offset, ret_cond, degrees);
 } 
 
 uint32_t sweepcut_without_sorting32(uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset)
+        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<uint32_t, uint32_t>(ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_without_sorting<uint32_t, uint32_t>(ids, results, num, n, ai, aj, a,
+                                                        offset, ret_cond, degrees);
 } 
 
 uint32_t sweepcut_without_sorting32_64(uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset)
+        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<uint32_t, int64_t>(ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_without_sorting<uint32_t, int64_t>(ids, results, num, n, ai, aj, a,
+                                                       offset, ret_cond, degrees);
 } 
 
 
 int64_t sweepcut_with_sorting64(double* value, int64_t* ids, int64_t* results, int64_t num, 
-        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset)
+        int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<int64_t, int64_t>(value, ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_with_sorting<int64_t, int64_t>(value, ids, results, num, n, ai, aj, a,
+                                                   offset, ret_cond, degrees);
 } 
 
 uint32_t sweepcut_with_sorting32(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset)
+        uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<uint32_t, uint32_t>(value, ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_with_sorting<uint32_t, uint32_t>(value, ids, results, num, n, ai, aj, a,
+                                                     offset, ret_cond, degrees);
 } 
 
 uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
-        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset)
+        uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, a, offset);
+    return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, a,
+                                                    offset, ret_cond, degrees);
 } 
 
 /**
@@ -100,7 +108,7 @@ uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* resu
  */
 template<typename vtype, typename itype>
 vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, double* a, vtype offset)
+        itype* ai, vtype* aj, double* a, vtype offset, double* ret_cond, double* degrees)
 {
     pair<vtype, double>* possible_nodes = new pair<vtype, double>[num];
     for(vtype i = 0; i < num; i ++){
@@ -119,10 +127,11 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
     r.aj = aj;
     r.a = a;
     r.offset = offset;
-    vtype actual_length = sweep_cut<vtype, itype>(&r, newids, results, num);
+    vtype actual_length = sweep_cut<vtype, itype>(&r, newids, results, num, ret_cond, degrees);
 
     return actual_length;
 }
+
 
 /**
  * The sweepcut procedure which won't sort the given vertices in the 
@@ -143,7 +152,7 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
 
 template<typename vtype, typename itype>
 vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, double* a, vtype offset)
+        itype* ai, vtype* aj, double* a, vtype offset, double* ret_cond, double* degrees)
 {
     sparserow<vtype, itype> r;
     r.m = n;
@@ -152,13 +161,14 @@ vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, vtype n,
     r.aj = aj;
     r.a = a;
     r.offset = offset;
-    vtype actual_length = sweep_cut<vtype, itype>(&r, ids, results, num);
+    vtype actual_length = sweep_cut<vtype, itype>(&r, ids, results, num, ret_cond, degrees);
 
     return actual_length;
 }
 
 template<typename vtype, typename itype>
-vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype num)
+vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype num,
+                double* ret_cond, double* degrees)
 {
     unordered_map<vtype, size_t> rank;
     for(vtype i = 0; i < num; i ++){
@@ -178,7 +188,12 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
     double min_cond = -1;
     for(vtype i = 0; i < num; i ++){
         vtype v = ids[i] - rows->offset;
-        deg = get_degree<vtype, itype>(rows, v);
+        if(degrees == NULL){
+            deg = get_degree<vtype, itype>(rows, v);
+        }
+        else{
+            deg = degrees[v];
+        }
         cut_change = deg;
         for(vtype j = rows->ai[v] - rows->offset; j < rows->ai[v+1] - rows->offset; j ++){
             neighbor = rows->aj[j] - rows->offset;
@@ -205,10 +220,12 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
     for(vtype j = 0; j <= min_id; j ++){
         results[j] = ids[j];
     }
+    *ret_cond = min_cond;
     //cout << min_cond << endl;
 
     return min_id + 1;
 }
+
 
 template<typename vtype,typename itype>
 double get_degree(sparserow<vtype, itype>* rows, vtype id)

@@ -13,7 +13,7 @@ int main()
     double a[11] = {1,1,1,1,1,1,1,1,1,1,1};
     double rho = 0.00001;
     double alpha = 0.15;
-    int64_t v = 1;
+    int64_t v[2] = {1,2};
     double epsilon = 0.0001;
     int64_t maxiter = 10000;
     double* p = new double[4]();
@@ -27,7 +27,7 @@ int main()
         ds[i] = sqrt(d[i]);
         dsinv[i] = 1/ds[i];
     }
-    cout << proxl1PRaccel64(n,ai,aj,a,alpha,rho,v,d,ds,dsinv,epsilon,grad,p,maxiter,0,100) << endl;
+    cout << proxl1PRaccel64(n,ai,aj,a,alpha,rho,v,2,d,ds,dsinv,epsilon,grad,p,maxiter,0,100) << endl;
     cout << "p" << endl;
     for(int i = 0; i < 4; i ++){
         cout << p[i] << endl;
