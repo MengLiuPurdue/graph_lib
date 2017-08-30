@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string>
 #include "../include/readData.hpp"
+#include <algorithm>
 
 using namespace std;
 
