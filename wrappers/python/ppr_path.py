@@ -13,7 +13,7 @@ from operator import itemgetter
 import numpy as np
 from numpy.ctypeslib import ndpointer
 from ctypes import *
-import platform
+from sys import platform
 
 class ret_path_info:
     num_eps = 0
@@ -40,10 +40,7 @@ class ret_rank_info:
 
 def ppr_path(n,ai,aj,alpha,eps,rho,seedids,nseedids,xlength):
     
-    if platform.architecture() == ('64bit', ''):
-        float_type = np.float64
-    else:
-        float_type = np.float32
+    float_type = c_double
         
     dt = np.dtype(ai[0])
     (itype, ctypes_itype) = (np.int64, c_int64) if dt.name == 'int64' else (np.uint32, c_uint32)
@@ -51,18 +48,26 @@ def ppr_path(n,ai,aj,alpha,eps,rho,seedids,nseedids,xlength):
     (vtype, ctypes_vtype) = (np.int64, c_int64) if dt.name == 'int64' else (np.uint32, c_uint32)
 
     #load library
-    lib=cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
+    if platform == "linux2":
+        extension = ".so"
+    elif platform == "darwin":
+        extension = ".dylib"
+    elif platform == "win32":
+        extension = ".dll"
+    else:
+        print("Unknown system type!")
+        return (True,0,0)
+    lib=cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph"+extension)
 
     if (vtype, itype) == (np.int64, np.int64):
         fun = lib.ppr_path64
-    elif (vtype, itype) == (np.int32, np.int64):
+    elif (vtype, itype) == (np.uint32, np.int64):
         fun = lib.ppr_path32_64
     else:
         fun = lib.ppr_path32
 
     #call C function
     maxstep = int(1.0/((1.0-alpha)*eps))
-    print maxstep
     class path_info(Structure):
         _fields_=[("num_eps",POINTER(c_int64)),
                   ("epsilon",POINTER(c_double * maxstep)),
@@ -132,7 +137,6 @@ def ppr_path(n,ai,aj,alpha,eps,rho,seedids,nseedids,xlength):
     actual_xids[:] = [xids[i] for i in range(actual_length)]
     ret_eps_stats = ret_path_info()
     ret_eps_stats.num_eps = num_eps.value
-    print "here"
     ret_eps_stats.epsilon = ret_eps_stats.epsilon + [epsilon[0:(num_eps.value+1)]]
     ret_eps_stats.conds = ret_eps_stats.conds + [conds[0:(num_eps.value+1)]]
     ret_eps_stats.cuts = ret_eps_stats.cuts + [cuts[0:(num_eps.value+1)]]

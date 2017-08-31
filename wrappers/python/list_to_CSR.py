@@ -1,6 +1,7 @@
 import numpy as np
 from operator import itemgetter
 import platform
+import ctypes
 
 def list_to_CSR(filename):
     edge_tuples=[]
@@ -41,10 +42,7 @@ def list_to_CSR(filename):
 
     #convert edge list to CSR
     print("convert list to CSR")
-    if platform.architecture() == ('64bit', ''):
-        float_type = np.float64
-    else:
-        float_type = np.float32
+    float_type = ctypes.c_double
     ai = np.zeros(n+1,dtype=itype)
     aj = np.zeros(m,dtype=vtype)
     a = np.zeros(m,dtype=float_type)

@@ -16,6 +16,9 @@ int main()
     int64_t m = 0, n = 0;
     int64_t* ai = NULL, *aj = NULL;
     double* a = NULL;
+    for(int i = 0; i < n; i ++){
+        a[i] = 1.0;
+    }
     read_and_convert<int64_t, int64_t>(filename.c_str(), &m, &n, &ai, &aj, &a);
 
     //Read seed

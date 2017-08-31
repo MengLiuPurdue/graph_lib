@@ -14,7 +14,7 @@ from operator import itemgetter
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
-import platform
+from sys import platform
 
 def wrapped_ndptr(*args, **kwargs):
     base = ndpointer(*args, **kwargs)
@@ -26,10 +26,7 @@ def wrapped_ndptr(*args, **kwargs):
 
 def sweepcut(n,ai,aj,a,ids,num,values,flag,degrees = None):
     
-    if platform.architecture() == ('64bit', ''):
-        float_type = np.float64
-    else:
-        float_type = np.float32
+    float_type = ctypes.c_double
 
     dt = np.dtype(ai[0])
     (itype, ctypes_itype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
@@ -37,7 +34,16 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag,degrees = None):
     (vtype, ctypes_vtype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
 
     #load library
-    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
+    if platform == "linux2":
+        extension = ".so"
+    elif platform == "darwin":
+        extension = ".dylib"
+    elif platform == "win32":
+        extension = ".dll"
+    else:
+        print("Unknown system type!")
+        return (True,0,0)
+    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph"+extension)
     
     if (vtype, itype) == (np.int64, np.int64):
         fun = lib.sweepcut_with_sorting64 if flag == 0 else lib.sweepcut_without_sorting64
@@ -55,16 +61,16 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag,degrees = None):
     if degrees is not None:
         degrees = np.array(degrees,dtype=float_type)
     if flag == 0:
-        fun.argtypes=[ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+        fun.argtypes=[ndpointer(float_type, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
                       ctypes_vtype,ctypes_vtype,
                       ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                      ndpointer(float_type, flags="C_CONTIGUOUS"),
                       ctypes_vtype,
-                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                      wrapped_ndptr(dtype=ctypes.c_double,ndim=1,flags="C_CONTIGUOUS")
+                      ndpointer(float_type, flags="C_CONTIGUOUS"),
+                      wrapped_ndptr(dtype=float_type,ndim=1,flags="C_CONTIGUOUS")
                       ]
         actual_length=fun(values,ids,results,num,n,ai,aj,a,0,min_cond,degrees)
     else:
@@ -73,10 +79,10 @@ def sweepcut(n,ai,aj,a,ids,num,values,flag,degrees = None):
                       ctypes_vtype,ctypes_vtype,
                       ndpointer(ctypes_itype, flags="C_CONTIGUOUS"),
                       ndpointer(ctypes_vtype, flags="C_CONTIGUOUS"),
-                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                      ndpointer(float_type, flags="C_CONTIGUOUS"),
                       ctypes_vtype,
-                      ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                      wrapped_ndptr(dtype=ctypes.c_double,ndim=1,flags="C_CONTIGUOUS")
+                      ndpointer(float_type, flags="C_CONTIGUOUS"),
+                      wrapped_ndptr(dtype=float_type,ndim=1,flags="C_CONTIGUOUS")
                       ]
         actual_length=fun(ids,results,num,n,ai,aj,a,0,min_cond,degrees)
 

@@ -13,14 +13,11 @@ from operator import itemgetter
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
-import platform
+from sys import platform
 
 def aclpagerank(n,ai,aj,alpha,eps,seedids,nseedids,maxsteps,xlength,flag):
 
-    if platform.architecture() == ('64bit', ''):
-        float_type = np.float64
-    else:
-        float_type = np.float32
+    float_type = ctypes.c_double
 
     dt = np.dtype(ai[0])
     (itype, ctypes_itype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
@@ -28,11 +25,20 @@ def aclpagerank(n,ai,aj,alpha,eps,seedids,nseedids,maxsteps,xlength,flag):
     (vtype, ctypes_vtype) = (np.int64, ctypes.c_int64) if dt.name == 'int64' else (np.uint32, ctypes.c_uint32)
 
     #load library
-    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph.dylib")
+    if platform == "linux2":
+        extension = ".so"
+    elif platform == "darwin":
+        extension = ".dylib"
+    elif platform == "win32":
+        extension = ".dll"
+    else:
+        print("Unknown system type!")
+        return (True,0,0)
+    lib=ctypes.cdll.LoadLibrary("../../lib/graph_lib_test/./libgraph"+extension)
     
     if (vtype, itype) == (np.int64, np.int64):
         fun = lib.aclpagerank64
-    elif (vtype, itype) == (np.int32, np.int64):
+    elif (vtype, itype) == (np.uint32, np.int64):
         fun = lib.aclpagerank32_64
     else:
         fun = lib.aclpagerank32

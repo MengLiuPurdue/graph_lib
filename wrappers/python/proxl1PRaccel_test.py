@@ -19,4 +19,3 @@ for i in range(n):
 (not_converged,grad,p) = proxl1PRaccel(ai,aj,a,ref_node,d,ds,dsinv)
 print p
 print len(p)
-print(min(a))
