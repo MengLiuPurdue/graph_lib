@@ -44,8 +44,8 @@
 #include <numeric>
 #include <vector>
 
-#include "include/aclpagerank_weighted.h"
 #include "include/aclpagerank_weighted_c_interface.h"
+#include "include/routines.hpp"
 
 using namespace std;
 
@@ -60,9 +60,9 @@ uint32_t aclpagerank_weighted32(
         uint32_t maxsteps,
         uint32_t* xids, uint32_t xlength, double* values)
 {
-    uint32_t actual_length = aclpagerank_weighted <uint32_t, uint32_t> (n, ai, aj, a, offset, alpha, 
-                                                   eps, seedids, nseedids, maxsteps, 
-                                                   xids, xlength, values);
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    uint32_t actual_length = g.aclpagerank_weighted(alpha, eps, seedids, nseedids, maxsteps,
+                                                    xids, xlength, values);
     return actual_length;
 }
 
@@ -74,8 +74,8 @@ int64_t aclpagerank_weighted64(
         int64_t maxsteps,
         int64_t* xids, int64_t xlength, double* values)
 {
-    int64_t actual_length = aclpagerank_weighted <int64_t, int64_t> (n, ai, aj, a, offset, alpha,
-                                                   eps, seedids, nseedids, maxsteps, 
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    int64_t actual_length = g.aclpagerank_weighted(alpha, eps, seedids, nseedids, maxsteps,
                                                    xids, xlength, values);
     return actual_length;
 }
@@ -88,72 +88,41 @@ uint32_t aclpagerank_weighted32_64(
         uint32_t maxsteps,
         uint32_t* xids, uint32_t xlength, double* values)
 {
-    uint32_t actual_length = aclpagerank_weighted <uint32_t, int64_t> (n, ai, aj, a, offset, alpha, 
-                                                   eps, seedids, nseedids, maxsteps, 
-                                                   xids, xlength, values);
-   return actual_length;
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    uint32_t actual_length = g.aclpagerank_weighted(alpha, eps, seedids, nseedids, maxsteps,
+                                                    xids, xlength, values);
+    return actual_length;
 }
 
 template<typename vtype, typename itype>
-vtype aclpagerank_weighted(
-        vtype n, itype* ai, vtype* aj, double* a, vtype offset,
-            //Compressed sparse row representation, with offset for
-            //zero based (matlab) or one based arrays (julia)
-        double alpha,    //value of alpha
-        double eps,    //value of epsilon
-        vtype* seedids, vtype nseedids,    //the set indices for seeds
-        vtype maxsteps,    //the maximum number of steps
-        vtype* xids, vtype xlength, double* values) //the solution vector
+vtype graph<vtype,itype>::aclpagerank_weighted(double alpha, double eps, vtype* seedids,
+                                               vtype nseedids, vtype maxsteps, vtype* xids,
+                                               vtype xlength, double* values)
 {
-    sparserow<vtype, itype> r;
-    r.m = n;
-    r.n = n;
-    r.ai = ai;
-    r.aj = aj;
-    r.a = a;
-    r.offset = offset;
     vtype actual_length;
-    actual_length=pprgrow_weighted<vtype, itype>(&r, alpha, eps, seedids,
-                                   nseedids, maxsteps, xids, 
-                                   xlength, values);
+    actual_length=pprgrow_weighted(alpha, eps, seedids, nseedids, maxsteps, xids, xlength, values);
 
     return actual_length;
 }
 
-template<typename vtype,typename itype>
-double get_weight(sparserow<vtype, itype>* rows, vtype u, vtype v)
-{
-    double weight;
-    for(itype i = rows->ai[u] - rows->offset; i < rows->ai[u + 1] - rows->offset; i ++){
-        if(rows->aj[i] == v){
-            weight = rows->a[i];
-        }
-    }
-    return weight;
-}
-
 
 template<typename vtype, typename itype>
-vtype pprgrow_weighted(sparserow<vtype, itype>* rows, double alpha, double eps,
-                vtype* seedids, vtype nseedids, vtype maxsteps, 
-                vtype* xids, vtype xlength, double* values)
+vtype graph<vtype,itype>::pprgrow_weighted(double alpha, double eps, vtype* seedids,
+                                           vtype nseedids, vtype maxsteps, vtype* xids,
+                                           vtype xlength, double* values)
 {
-    vector<double> vdegree(rows->m);
-    double* degrees = &vdegree[0];
-    for(size_t i = 0; i < rows->m; i ++){
-        double degree = 0;
-        for(size_t j = rows->ai[i] - rows->offset; j < rows->ai[i+1] - rows->offset; j ++){
-            degree += rows->a[j];
-        }
-        degrees[i] = degree;
+    vector<double> vdegree(n);
+    degrees = &vdegree[0];
+    for(size_t i = 0; i < n; i ++){
+        degrees[i] = get_degree_weighted(i);
     }
     unordered_map<vtype, double> x_map;
     unordered_map<vtype, double> r_map;
     typename unordered_map<vtype, double>::const_iterator x_iter, r_iter;
     queue<vtype> Q;
     for(int i = 0; i < nseedids; i ++){
-        r_map[seedids[i] - rows->offset] = 1;
-        x_map[seedids[i] - rows->offset] = 0;
+        r_map[seedids[i] - offset] = 1;
+        x_map[seedids[i] - offset] = 0;
     }
     for(r_iter = r_map.begin(); r_iter != r_map.end(); ++r_iter){
         if(r_iter->second >= eps * degrees[r_iter->first]){
@@ -183,17 +152,17 @@ vtype pprgrow_weighted(sparserow<vtype, itype>* rows, double alpha, double eps,
         r_map.at(j) = rj - pushval;
         vtype u;
         double ru_new, ru_old;
-        for(itype i = rows->ai[j] - rows->offset; i < rows->ai[j+1] - rows->offset; i++){
-            u = rows->aj[i] - rows->offset;
+        for(itype i = ai[j] - offset; i < ai[j+1] - offset; i++){
+            u = aj[i] - offset;
             r_iter = r_map.find(u);
             if(r_iter == r_map.end()){
                 ru_old = 0;
-                ru_new = rows->a[i] * delta;
+                ru_new = a[i] * delta;
                 r_map[u] = ru_new;
             }
             else{
                 ru_old = r_iter->second;
-                ru_new = rows->a[i] * delta + ru_old;
+                ru_new = a[i] * delta + ru_old;
                 r_map.at(u) = ru_new;
             }
             if(ru_new > eps * degrees[u] && ru_old <= eps * degrees[u]){
@@ -218,7 +187,7 @@ vtype pprgrow_weighted(sparserow<vtype, itype>* rows, double alpha, double eps,
         map_size = xlength;
     }
     for(j = 0; j < map_size; j ++){
-        xids[j] = possible_nodes[j].first + rows->offset;
+        xids[j] = possible_nodes[j].first + offset;
         values[j] = possible_nodes[j].second;
     }
     

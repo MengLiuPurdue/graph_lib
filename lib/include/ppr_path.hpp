@@ -10,7 +10,8 @@
 using namespace std;
 
 template<typename vtype, typename itype>
-struct sparserow{
+class sparserow{
+    public:
         vtype m;
         vtype n;
         itype* ai;

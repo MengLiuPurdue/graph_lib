@@ -40,7 +40,7 @@
 #include <stdint.h>
 
 #include "include/sweepcut_c_interface.h"
-#include "include/sweepcut.h"
+#include "include/routines.hpp"
 
 using namespace std;
 
@@ -50,44 +50,44 @@ bool myobject (pair <vtype, double> i, pair <vtype, double> j) { return (i.secon
 int64_t sweepcut_without_sorting64(int64_t* ids, int64_t* results, int64_t num, 
         int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<int64_t, int64_t>(ids, results, num, n, ai, aj, a,
-                                                      offset, ret_cond, degrees);
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_without_sorting(ids,results,num,ret_cond);
 } 
 
 uint32_t sweepcut_without_sorting32(uint32_t* ids, uint32_t* results, uint32_t num, 
         uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<uint32_t, uint32_t>(ids, results, num, n, ai, aj, a,
-                                                        offset, ret_cond, degrees);
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_without_sorting(ids,results,num,ret_cond);
 } 
 
 uint32_t sweepcut_without_sorting32_64(uint32_t* ids, uint32_t* results, uint32_t num, 
         uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_without_sorting<uint32_t, int64_t>(ids, results, num, n, ai, aj, a,
-                                                       offset, ret_cond, degrees);
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_without_sorting(ids,results,num,ret_cond);
 } 
 
 
 int64_t sweepcut_with_sorting64(double* value, int64_t* ids, int64_t* results, int64_t num, 
         int64_t n, int64_t* ai, int64_t* aj, double* a, int64_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<int64_t, int64_t>(value, ids, results, num, n, ai, aj, a,
-                                                   offset, ret_cond, degrees);
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_with_sorting(value,ids,results,num,ret_cond);
 } 
 
 uint32_t sweepcut_with_sorting32(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
         uint32_t n, uint32_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<uint32_t, uint32_t>(value, ids, results, num, n, ai, aj, a,
-                                                     offset, ret_cond, degrees);
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_with_sorting(value,ids,results,num,ret_cond);
 } 
 
 uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* results, uint32_t num, 
         uint32_t n, int64_t* ai, uint32_t* aj, double* a, uint32_t offset, double* ret_cond, double* degrees)
 {
-    return sweepcut_with_sorting<uint32_t, int64_t>(value, ids, results, num, n, ai, aj, a,
-                                                    offset, ret_cond, degrees);
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,a,offset,degrees);
+    return g.sweepcut_with_sorting(value,ids,results,num,ret_cond);
 } 
 
 /**
@@ -107,8 +107,8 @@ uint32_t sweepcut_with_sorting32_64(double* value, uint32_t* ids, uint32_t* resu
  *     actual_length - the number of nonzero entries in the best set with the lowest conductance
  */
 template<typename vtype, typename itype>
-vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, double* a, vtype offset, double* ret_cond, double* degrees)
+vtype graph<vtype,itype>::sweepcut_with_sorting(double* value, vtype* ids, vtype* results,
+                                                vtype num, double* ret_cond)
 {
     pair<vtype, double>* possible_nodes = new pair<vtype, double>[num];
     for(vtype i = 0; i < num; i ++){
@@ -120,14 +120,7 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
     for(vtype i = 0; i < num; i ++){
         newids[i]=possible_nodes[i].first;
     }
-    sparserow<vtype, itype> r;
-    r.m = n;
-    r.n = n;
-    r.ai = ai;
-    r.aj = aj;
-    r.a = a;
-    r.offset = offset;
-    vtype actual_length = sweep_cut<vtype, itype>(&r, newids, results, num, ret_cond, degrees);
+    vtype actual_length = sweep_cut(newids, results, num, ret_cond);
 
     return actual_length;
 }
@@ -151,33 +144,26 @@ vtype sweepcut_with_sorting(double* value, vtype* ids, vtype* results, vtype num
  */
 
 template<typename vtype, typename itype>
-vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, vtype n,
-        itype* ai, vtype* aj, double* a, vtype offset, double* ret_cond, double* degrees)
+vtype graph<vtype,itype>::sweepcut_without_sorting(vtype* ids, vtype* results, vtype num, double* ret_cond)
 {
-    sparserow<vtype, itype> r;
-    r.m = n;
-    r.n = n;
-    r.ai = ai;
-    r.aj = aj;
-    r.a = a;
-    r.offset = offset;
-    vtype actual_length = sweep_cut<vtype, itype>(&r, ids, results, num, ret_cond, degrees);
+    vtype actual_length = sweep_cut(ids, results, num, ret_cond);
 
     return actual_length;
 }
 
 template<typename vtype, typename itype>
-vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype num,
-                double* ret_cond, double* degrees)
+vtype graph<vtype,itype>::sweep_cut(vtype* ids, vtype* results, vtype num, double* ret_cond)
 {
+    cout << m << endl;
+    cout << n << endl;
     unordered_map<vtype, size_t> rank;
     for(vtype i = 0; i < num; i ++){
-        rank[ids[i] - rows->offset] = i + 1;
+        rank[ids[i] - offset] = i + 1;
     }
-    itype total_nnz = rows->ai[rows->m] - rows->offset;
+    itype total_nnz = m;
     double total_degree = 0;
     for(itype i = 0; i < total_nnz; i ++){
-        total_degree += rows->a[i];
+        total_degree += a[i];
     }
     //cout << total_degree << endl;
     double deg, cut_change, neighbor;
@@ -187,18 +173,18 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
     double curvolume = 0;
     double min_cond = -1;
     for(vtype i = 0; i < num; i ++){
-        vtype v = ids[i] - rows->offset;
+        vtype v = ids[i] - offset;
         if(degrees == NULL){
-            deg = get_degree<vtype, itype>(rows, v);
+            deg = get_degree_weighted(v);
         }
         else{
             deg = degrees[v];
         }
         cut_change = deg;
-        for(vtype j = rows->ai[v] - rows->offset; j < rows->ai[v+1] - rows->offset; j ++){
-            neighbor = rows->aj[j] - rows->offset;
+        for(vtype j = ai[v] - offset; j < ai[v+1] - offset; j ++){
+            neighbor = aj[j] - offset;
             if(rank.count(neighbor) > 0 && rank[neighbor] < rank[v]){
-                cut_change -= 2 * rows->a[j];
+                cut_change -= 2 * a[j];
             }
         }
         curcutsize += cut_change;
@@ -227,12 +213,3 @@ vtype sweep_cut(sparserow<vtype, itype>* rows, vtype* ids, vtype* results, vtype
 }
 
 
-template<typename vtype,typename itype>
-double get_degree(sparserow<vtype, itype>* rows, vtype id)
-{
-    double d = 0;
-    for(vtype j = rows->ai[id] - rows->offset; j < rows->ai[id+1] - rows->offset; j ++){
-        d += rows->a[j];
-    }
-    return d;
-}

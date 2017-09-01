@@ -29,6 +29,7 @@
 #include <time.h>
 
 #include "include/proxl1PRaccel_c_interface.h"
+#include "include/routines.hpp"
 
 using namespace std;
 
@@ -59,9 +60,9 @@ void update_grad(double* grad, vector<double> y, vector<double> c, itype* ai, vt
 }
 
     template<typename vtype, typename itype>
-vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, double rho,
-                    vtype* v, vtype v_nums, double* d, double* ds, double* dsinv, double epsilon,
-                    double* grad, double* p, vtype maxiter,vtype offset,double max_time)
+vtype graph<vtype,itype>::proxl1PRaccel(double alpha, double rho, vtype* v, vtype v_nums, double* d,
+                                        double* ds, double* dsinv, double epsilon, double* grad, double* p,
+                                        vtype maxiter,double max_time)
 {
     /*cout << "dsinv" << endl;
     for(vtype i = 0; i < n; i ++){
@@ -75,8 +76,7 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
     clock_t t1,t2;
     vtype not_converged = 0;
     vector<double> c (n,0);
-    for(vtype i = 0; i < v_nums; i ++)
-    {
+    for(vtype i = 0; i < v_nums; i ++){
         grad[v[i]-offset] = -1 * alpha / (v_nums * ds[v[i]-offset]);
         c[v[i]-offset] = -1 * grad[v[i]-offset];
     }
@@ -139,8 +139,7 @@ vtype proxl1PRaccel(vtype n, itype* ai, vtype* aj, double* a, double alpha, doub
         }*/
         
         t2 = clock();
-        if(((double)t2 - (double)t1)/double(CLOCKS_PER_SEC) > max_time)
-        {
+        if(((double)t2 - (double)t1)/double(CLOCKS_PER_SEC) > max_time){
             not_converged = 1;
             return not_converged;
         }
@@ -163,14 +162,16 @@ uint32_t proxl1PRaccel32(uint32_t n, uint32_t* ai, uint32_t* aj, double* a, doub
                          double rho, uint32_t* v, uint32_t v_nums, double* d, double* ds,
                          double* dsinv, double epsilon, double* grad, double* p, uint32_t maxiter, uint32_t offset,double max_time)
 {
-    return proxl1PRaccel<uint32_t,uint32_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    return g.proxl1PRaccel(alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,max_time);
 }
 
 int64_t proxl1PRaccel64(int64_t n, int64_t* ai, int64_t* aj, double* a, double alpha,
                         double rho, int64_t* v, int64_t v_nums, double* d, double* ds,
                         double* dsinv,double epsilon, double* grad, double* p, int64_t maxiter, int64_t offset,double max_time)
 {
-    return proxl1PRaccel<int64_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    return g.proxl1PRaccel(alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,max_time);
 }
 
 uint32_t proxl1PRaccel32_64(uint32_t n, int64_t* ai, uint32_t* aj, double* a, double alpha,
@@ -178,5 +179,6 @@ uint32_t proxl1PRaccel32_64(uint32_t n, int64_t* ai, uint32_t* aj, double* a, do
                             double* dsinv, double epsilon, double* grad, double* p,
                             uint32_t maxiter, uint32_t offset,double max_time)
 {
-    return proxl1PRaccel<uint32_t,int64_t>(n,ai,aj,a,alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,offset,max_time);
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,a,offset,NULL);
+    return g.proxl1PRaccel(alpha,rho,v,v_nums,d,ds,dsinv,epsilon,grad,p,maxiter,max_time);
 }

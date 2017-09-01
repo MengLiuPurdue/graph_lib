@@ -36,6 +36,7 @@ int main()
     int64_t actual_length = sweepcut_without_sorting64(ids, bestclus, nids,
                                                        m, ai, aj, a, offset, &ret_cond, NULL);
     cout << "actual length" << endl << actual_length << endl;
+    cout << "min conductance" << endl << ret_cond << endl;
     cout << "best set" << endl;
     for(int i = 0; i < actual_length; i ++)
     {
