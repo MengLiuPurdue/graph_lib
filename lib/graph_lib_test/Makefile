@@ -16,7 +16,7 @@ CXXFLAGS := -std=c++11 -Wall -O3 -Wshadow -fPIC
 SWEEPCUT_SRCS = ../sweepcut.cpp sweepcut_test.cpp readData.cpp
 ACLPAGERANK_SRCS = ../aclpagerank.cpp aclpagerank_test.cpp readData.cpp
 MQI_SRCS = ../MQI.cpp MQI_test.cpp ../maxflow.cpp ../MQI_c_interface.cpp readData.cpp
-PPR_PATH_SRCS = ../ppr_path.cpp ppr_path_test.cpp ../ppr_path_c_interface.cpp readData.cpp
+PPR_PATH_SRCS = ../ppr_path.cpp ppr_path_test.cpp readData.cpp
 ACLPAGERANK_WEIGHTED_SRCS = ../aclpagerank_weighted.cpp aclpagerank_weighted_test.cpp readData.cpp
 PROXL1PRACCEL_SRCS = ../proxl1PRaccel.cpp proxl1PRaccel_test.cpp readData.cpp
 
@@ -27,7 +27,7 @@ PPR_PATH_OBJS = $(PPR_PATH_SRCS:%.cpp=%.o)
 ACLPAGERANK_WEIGHTED_OBJS = $(ACLPAGERANK_WEIGHTED_SRCS:%.cpp=%.o)
 PROXL1PRACCEL_OBJS = $(PROXL1PRACCEL_SRCS:%.cpp=%.o)
 
-LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o ../ppr_path_c_interface.o ../aclpagerank_weighted.o ../proxl1PRaccel.o
+LIBOBJS = ../sweepcut.o ../aclpagerank.o ../MQI_c_interface.o ../ppr_path.o ../aclpagerank_weighted.o ../proxl1PRaccel.o
 
 all: sweepcut aclpagerank MQI ppr_path aclpagerank_weighted proxl1PRaccel $(LIB)
 

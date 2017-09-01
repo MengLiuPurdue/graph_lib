@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
-#include "../include/aclpagerank_weighted.h"
 #include "../include/aclpagerank_weighted_c_interface.h"
 #include "../include/readData.hpp"
 

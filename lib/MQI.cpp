@@ -24,7 +24,6 @@
  *     int64_t actual_length = MQI64(m, nR, ai, aj, offset, R, ret_set);
  */
 
-
 #ifdef MQI_H
 
 #include <iostream>
@@ -129,3 +128,4 @@ vtype graph<vtype,itype>::MQI(vtype nR, vtype* R, vtype* ret_set)
 }
 
 #endif
+

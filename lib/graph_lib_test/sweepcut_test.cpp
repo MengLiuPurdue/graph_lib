@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <iostream>
-#include "../include/sweepcut.h"
 #include "../include/sweepcut_c_interface.h"
 #include "../include/readData.hpp"
 

@@ -2,29 +2,9 @@
 #define PPR_PATH_HPP
 
 #include <vector>
-#include "sparsehash/dense_hash_map.h"
-#include "sparseheap.hpp" // include our heap functions
-#include "sparserank.hpp" // include our sorted-list functions
-#include "sparsevec.hpp" // include our sparse hashtable functions
 
 using namespace std;
 
-template<typename vtype, typename itype>
-class sparserow{
-    public:
-        vtype m;
-        vtype n;
-        itype* ai;
-        vtype* aj;
-        vtype offset;
-        itype volume;
-};
-
-
-template<typename vtype, typename itype>
-vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
-               double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids,
-               vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results);
 
 template<typename vtype>
 struct sweep_info {
@@ -121,39 +101,5 @@ struct rank_record {
     }
 };
 
-
-template<typename vtype, typename itype>
-struct rank_map{
-    typedef google::dense_hash_map<vtype, vtype> Map;
-};
-
-template<typename vtype, typename itype>
-vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
-        double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength, double** ret_eps_results);
-
-template<typename vtype, typename itype>
-bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
-            sparse_max_rank<vtype,double,size_t>& rankinfo, sweep_info<vtype>& swinfo);
-
-template<typename vtype, typename itype>
-vtype rank_permute(std::vector<vtype> &cluster, vtype r_end, vtype r_start);
-
-template<typename vtype, typename itype>
-void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, const double eps_min,
-        const double rho, const vtype max_push_count, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
-        std::vector<vtype>& cluster);
-
-template<typename vtype, typename itype>
-void hypercluster_graphdiff_multiple(sparserow<vtype, itype>* G, const std::vector<vtype>& set,
-                        double t, double eps, double rho, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
-                         std::vector<vtype>& cluster);
-
-template<typename vtype, typename itype>
-void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n, vtype offset);
-
-template<typename vtype, typename itype>
-size_t sr_degree(sparserow<vtype, itype>* s, vtype u);
-
-#include "../ppr_path.cpp"
 #endif
+

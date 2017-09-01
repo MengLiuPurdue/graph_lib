@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include "../include/readData.hpp"
+#include <cmath>
 
 using namespace std;
 
@@ -133,7 +134,7 @@ int main()
         if(abs(epsilon[i] - correct_epsilon[i]) > pow(10,-5)
            || abs(conds[i] - correct_conds[i]) > pow(10,5)
            || abs(cuts[i] - correct_cuts[i]) > pow(10,-5)
-           || abs(vols[i] - correct_vols[i] > pow(10,-5))
+           || abs(vols[i] - correct_vols[i]) > pow(10,-5)
            || setsizes[i] != correct_setsizes[i] || stepnums[i] != correct_stepnums[i]){
             cout << "eps stats is not correct!" << endl;
             return EXIT_FAILURE;

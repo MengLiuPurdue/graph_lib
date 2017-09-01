@@ -42,8 +42,8 @@
 #include <algorithm>
 #include <stdint.h>
 
-#include "include/aclpagerank.h"
 #include "include/aclpagerank_c_interface.h"
+#include "include/routines.hpp"
 
 using namespace std;
 
@@ -61,9 +61,8 @@ uint32_t aclpagerank32(
         uint32_t maxsteps,
         uint32_t* xids, uint32_t xlength, double* values)
 {
-    uint32_t actual_length = aclpagerank <uint32_t, uint32_t> (n, ai, aj, offset, alpha, 
-                                                   eps, seedids, nseedids, maxsteps, 
-                                                   xids, xlength, values);
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    uint32_t actual_length = g.aclpagerank(alpha, eps, seedids, nseedids, maxsteps, xids, xlength, values);
     return actual_length;
 }
 
@@ -78,9 +77,8 @@ int64_t aclpagerank64(
         int64_t maxsteps,
         int64_t* xids, int64_t xlength, double* values)
 {
-    int64_t actual_length = aclpagerank <int64_t, int64_t> (n, ai, aj, offset, alpha,
-                                                   eps, seedids, nseedids, maxsteps, 
-                                                   xids, xlength, values);
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    int64_t actual_length = g.aclpagerank(alpha, eps, seedids, nseedids, maxsteps, xids, xlength, values);
     return actual_length;
 }
 
@@ -95,34 +93,20 @@ uint32_t aclpagerank32_64(
         uint32_t maxsteps,
         uint32_t* xids, uint32_t xlength, double* values)
 {
-    uint32_t actual_length = aclpagerank <uint32_t, int64_t> (n, ai, aj, offset, alpha, 
-                                                   eps, seedids, nseedids, maxsteps, 
-                                                   xids, xlength, values);
-   return actual_length;
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    uint32_t actual_length = g.aclpagerank(alpha, eps, seedids, nseedids, maxsteps, xids, xlength, values);
+    return actual_length;
 }
 
 /**
  * aclpagerank template function
  */
 template<typename vtype, typename itype>
-vtype aclpagerank(
-        vtype n, itype* ai, vtype* aj, vtype offset,
-        double alpha,
-        double eps,
-        vtype* seedids, vtype nseedids,
-        vtype maxsteps,
-        vtype* xids, vtype xlength, double* values) 
+vtype graph<vtype,itype>::aclpagerank(double alpha, double eps, vtype* seedids, vtype nseedids,
+                                      vtype maxsteps, vtype* xids, vtype xlength, double* values)
 {
-    sparserow<vtype, itype> r;
-    r.m = n;
-    r.n = n;
-    r.ai = ai;
-    r.aj = aj;
-    r.offset = offset;
     vtype actual_length;
-    actual_length=pprgrow<vtype, itype>(&r, alpha, eps, seedids, 
-                                   nseedids, maxsteps, xids, 
-                                   xlength, values);
+    actual_length=pprgrow(alpha, eps, seedids, nseedids, maxsteps, xids, xlength, values);
 
     return actual_length;
 }
@@ -145,20 +129,19 @@ vtype aclpagerank(
  *     actual_length - the number of nonzero entries in the solution vector
  */
 template<typename vtype, typename itype>
-vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps, 
-                vtype* seedids, vtype nseedids, vtype maxsteps, 
-                vtype* xids, vtype xlength, double* values)
+vtype graph<vtype,itype>::pprgrow(double alpha, double eps,vtype* seedids, vtype nseedids,
+                                  vtype maxsteps, vtype* xids, vtype xlength, double* values)
 {
     unordered_map<vtype, double> x_map;
     unordered_map<vtype, double> r_map;
     typename unordered_map<vtype, double>::const_iterator x_iter, r_iter;
     queue<vtype> Q;
     for(int i = 0; i < nseedids; i ++){
-        r_map[seedids[i] - rows->offset] = 1;
-        x_map[seedids[i] - rows->offset] = 0;
+        r_map[seedids[i] - offset] = 1;
+        x_map[seedids[i] - offset] = 0;
     }
     for(r_iter = r_map.begin(); r_iter != r_map.end(); ++r_iter){
-        if(r_iter->second >= eps * get_degree<vtype>(rows, r_iter->first)){
+        if(r_iter->second >= eps * get_degree_unweighted(r_iter->first)){
             Q.push(r_iter->first);
         }
     }
@@ -171,7 +154,7 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
         x_iter = x_map.find(j);
         r_iter = r_map.find(j);
         rj = r_iter->second;
-        pushval = rj - eps * get_degree<vtype>(rows, j) * 0.5;
+        pushval = rj - eps * get_degree_unweighted(j) * 0.5;
         if(x_iter == x_map.end()){
             xj = (1-alpha)*pushval;
             x_map[j] = xj;
@@ -180,12 +163,12 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
             xj = x_iter->second + (1-alpha)*pushval;
             x_map.at(j) = xj;
         }
-        delta = alpha * pushval / get_degree<vtype>(rows, j);
+        delta = alpha * pushval / get_degree_unweighted(j);
         r_map.at(j) = rj - pushval;
         vtype u;
         double ru_new, ru_old;
-        for(itype i = rows->ai[j] - rows->offset; i < rows->ai[j+1] - rows->offset; i++){
-            u = rows->aj[i] - rows->offset;
+        for(itype i = ai[j] - offset; i < ai[j+1] - offset; i++){
+            u = aj[i] - offset;
             r_iter = r_map.find(u);
             if(r_iter == r_map.end()){
                 ru_old = 0;
@@ -197,7 +180,7 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
                 ru_new = delta + ru_old;
                 r_map.at(u) = ru_new;
             }
-            if(ru_new > eps * get_degree<vtype>(rows, u) && ru_old <= eps * get_degree<vtype>(rows,u)){
+            if(ru_new > eps * get_degree_unweighted(u) && ru_old <= eps * get_degree_unweighted(u)){
                 Q.push(u);
             }
         }
@@ -218,7 +201,7 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
         map_size = xlength;
     }
     for(j = 0; j < map_size; j ++){
-        xids[j] = possible_nodes[j].first + rows->offset;
+        xids[j] = possible_nodes[j].first + offset;
         values[j] = possible_nodes[j].second;
     }
     
@@ -227,9 +210,4 @@ vtype pprgrow(sparserow<vtype, itype>* rows, double alpha, double eps,
     return map_size;
 }
 
-template<typename vtype,typename itype>
-vtype get_degree(sparserow<vtype, itype>* rows, vtype id)
-{
-    return rows->ai[id + 1] - rows->ai[id];
-}
 

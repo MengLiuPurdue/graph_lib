@@ -8,7 +8,6 @@
 #include <sstream>
 #include <stdio.h>
 
-#include "../include/MQI.h"
 #include "../include/MQI_c_interface.h"
 #include "../include/readData.hpp"
 

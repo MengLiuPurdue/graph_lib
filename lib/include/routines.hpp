@@ -1,4 +1,12 @@
+#ifndef ROUTINES_HPP
+#define ROUTINES_HPP
+
 #include <unordered_map>
+#include "ppr_path.hpp"
+#include <vector>
+#include "sparseheap.hpp" // include our heap functions
+#include "sparserank.hpp" // include our sorted-list functions
+#include "sparsevec.hpp" // include our sparse hashtable functions
 
 using namespace std;
 
@@ -11,6 +19,7 @@ class graph{
     double* a; //Compressed sparse row representation
     vtype offset; //offset for zero based arrays (matlab) or one based arrays (julia)
     double* degrees; //degrees of vertices
+    double volume;
 public:
     //declare constructors
     graph<vtype,itype>(itype,vtype,itype*,vtype*,double*,vtype,double*);
@@ -37,6 +46,16 @@ public:
     vtype sweepcut_without_sorting(vtype* ids, vtype* results, vtype num,
                                    double* ret_cond);
     vtype sweep_cut(vtype* ids, vtype* results, vtype num, double* ret_cond);
+    //functions in ppr_path.hpp
+    vtype ppr_path(double alpha, double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids,
+                   vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results);
+    void hypercluster_graphdiff_multiple(const vector<vtype>& set, double t, double eps, double rho,
+                                         eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord, vector<vtype>& cluster);
+    void graphdiffseed(sparsevec& set, const double t, const double eps_min, const double rho, const vtype max_push_count,
+                       eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord, vector<vtype>& cluster);
+    bool resweep(vtype r_end, vtype r_start, sparse_max_rank<vtype,double,size_t>& rankinfo, sweep_info<vtype>& swinfo);
+    vtype rank_permute(vector<vtype> &cluster, vtype r_end, vtype r_start);
+    void copy_array_to_index_vector(const vtype* v, vector<vtype>& vec, vtype num);
     //functions in MQI.cpp
     vtype MQI(vtype nR, vtype* R, vtype* ret_set);
     void build_map(unordered_map<vtype, vtype>& R_map,unordered_map<vtype, vtype>& degree_map,
@@ -58,6 +77,7 @@ graph<vtype,itype>::graph(itype _m, vtype _n, itype* _ai, vtype* _aj, double* _a
     a = _a;
     offset = _offset;
     degrees = _degrees;
+    volume = (double)ai[n];
 }
 
 template<typename vtype,typename itype>
@@ -95,3 +115,5 @@ pair<itype, itype> graph<vtype,itype>::get_stats(unordered_map<vtype, vtype>& R_
     pair<itype, itype> set_stats (curvol, curcutsize);
     return set_stats;
 }
+
+#endif

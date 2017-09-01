@@ -64,8 +64,6 @@
 
 #include "include/ppr_path_c_interface.h"
 
-#ifdef PPR_PATH_HPP
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unordered_map>
@@ -76,12 +74,10 @@
 #include <assert.h>
 #include <vector>
 #include <math.h>
+
 #include "include/sparsehash/dense_hash_map.h"
 
-#include "include/ppr_path.hpp"
-#include "include/sparseheap.hpp" // include our heap functions
-#include "include/sparserank.hpp" // include our sorted-list functions
-#include "include/sparsevec.hpp" // include our sparse hashtable functions
+#include "include/routines.hpp"
 
 using namespace std;
 
@@ -96,21 +92,22 @@ using namespace std;
  * @param nseedids - number of indices in seed set
  * @param xids, xlength, values - the solution vector
  * */
+
+
 template<typename vtype, typename itype>
-vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha, 
-        double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids, 
-        vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
+struct rank_map{
+    typedef google::dense_hash_map<vtype, vtype> Map;
+};
+
+
+template<typename vtype, typename itype>
+vtype graph<vtype,itype>::ppr_path(double alpha, double eps, double rho, vtype* seedids, vtype nseedids, vtype* xids,
+                                   vtype xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
 {
     cout << "preprocessing start: " << endl;
-    sparserow<vtype, itype> r;
-    r.m = n;
-    r.n = n;
-    r.ai = ai;
-    r.aj = aj;
-    r.offset = offset;
 
     vector<vtype> seedset;
-    copy_array_to_index_vector<vtype, itype>(seedids, seedset, nseedids, offset);
+    copy_array_to_index_vector(seedids, seedset, nseedids);
     cout << "preprocessing end: " << endl;
 
     eps_info<vtype> eps_stats(1000);
@@ -119,7 +116,7 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
 
     cout << "call to hypercluster_graphdiff() start" << endl;
 
-    hypercluster_graphdiff_multiple<vtype, itype>(&r, seedset, alpha, eps, rho, eps_stats, rkrecord, bestclus);
+    hypercluster_graphdiff_multiple(seedset, alpha, eps, rho, eps_stats, rkrecord, bestclus);
 
     cout << "call to hypercluster_graphdiff() DONE" << endl;
 
@@ -159,8 +156,8 @@ vtype ppr_path(vtype n, itype* ai, vtype* aj, vtype offset, double alpha,
  * returns index of the best conductance in the vector swinfo.conductances
  */
 template<typename vtype, typename itype>
-bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
-            sparse_max_rank<vtype,double,size_t>& rankinfo, sweep_info<vtype>& swinfo)
+bool graph<vtype,itype>::resweep(vtype r_end, vtype r_start, sparse_max_rank<vtype,double,size_t>& rankinfo,
+                                 sweep_info<vtype>& swinfo)
 {
 
     // ensure sweep_info vectors are big enough
@@ -172,20 +169,20 @@ bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
     }
     double old_bcond = swinfo.best_cond_global;
     (swinfo.num_sweeps) += (r_start-r_end+1);
-    double total_degree = G->volume;
+    double total_degree = volume;
     bool was_there_new_bcond = 0;
     vtype rank_of_best_cond = 0;
 
 //  FAST WAY/*
     vtype gindex = rankinfo.rank_to_index(r_end);
-    double deg = (double)sr_degree(G,gindex);
+    double deg = get_degree_unweighted(gindex);
     std::vector<double> neighbors_ranked_less_than(r_start-r_end+1,0.0);
     std::vector<double> oldcut(r_start-r_end+1,0.0);
     std::vector<double> oldvol(r_start-r_end+1,0.0);
 
     // get rankings of neighbors of the shifted node
-    for (vtype nzi = G->ai[gindex] - G->offset; nzi < G->ai[gindex+1] - G->offset; nzi++){
-        vtype temp_gindex = G->aj[nzi] - G->offset;
+    for (vtype nzi = ai[gindex] - offset; nzi < ai[gindex+1] - offset; nzi++){
+        vtype temp_gindex = aj[nzi] - offset;
         vtype temp_rank = rankinfo.index_to_rank(temp_gindex);
         if ( (temp_rank < r_end) && (temp_rank >= 0) ){ neighbors_ranked_less_than[0] += 1.0; }
         if ( (temp_rank > r_end) && (temp_rank <= r_start) ){
@@ -259,7 +256,7 @@ bool resweep(vtype r_end, vtype r_start, sparserow<vtype, itype>* G,
  * reorders an ordered list to reflect an update to the rankings
  */
 template<typename vtype, typename itype>
-vtype rank_permute(std::vector<vtype> &cluster, vtype r_end, vtype r_start)
+vtype graph<vtype,itype>::rank_permute(std::vector<vtype> &cluster, vtype r_end, vtype r_start)
 {
     vtype temp_val = cluster[r_start];
     for (vtype ind = r_start; ind > r_end; ind--){ cluster[ind] = cluster[ind-1]; }
@@ -285,12 +282,11 @@ vtype rank_permute(std::vector<vtype> &cluster, vtype r_end, vtype r_start)
  *      max_push_count - the total number of steps to run
  */
 template<typename vtype, typename itype>
-void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, const double eps_min,
-        const double rho, const vtype max_push_count, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
-        std::vector<vtype>& cluster )
+void graph<vtype,itype>::graphdiffseed(sparsevec& set, const double t, const double eps_min, const double rho,
+                                       const vtype max_push_count, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
+                                       std::vector<vtype>& cluster )
 {
     cout << "ppr_all_mex::graphdiffseed()  BEGIN " << endl;
-    G->volume = (double)(G->ai[G->m] - G->offset);
     vtype npush = 0;
     vtype nsteps = 0;
     double best_eps = 1.0;
@@ -316,7 +312,7 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
         // STEP 1: pop top element off of heap
         double rij, rij_temp, rij_res;
         vtype ri = r.extractmax(rij_temp); // heap handles sorting internally
-        double degofi = (double)sr_degree(G,ri);
+        double degofi = get_degree_unweighted(ri);
         rij_res = cur_eps*rho;
         r.update(ri, rij_res ); // handles the heap internally
         rij = rij_temp - rij_res;
@@ -332,25 +328,25 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
 
         // STEP 3: update sweeps for new solution vector
         if ( rank_start == old_size ){ // CASE (1): new entry
-            new_bcond = resweep<vtype, itype>(rank_end, old_size, G, solvec, spstats);
+            new_bcond = resweep(rank_end, old_size, solvec, spstats);
             rkrecord.update_record(old_size, rank_end, ri, degofi, r.hsize, rij, spstats.best_cond_global);            
         }
         else if( (rank_start < old_size) && (rank_start > rank_end) ){ // CASE (2): existing entry changes rank
-            new_bcond = resweep<vtype, itype>(rank_end, rank_start, G, solvec, spstats);
+            new_bcond = resweep(rank_end, rank_start, solvec, spstats);
             rkrecord.update_record(rank_start, rank_end, ri, degofi, r.hsize, rij, spstats.best_cond_global);
         } 
         else {
             // CASE (3): no changes to sweep info, just resweep anyway.
-            new_bcond = resweep<vtype, itype>(rank_end, rank_start, G, solvec, spstats);
+            new_bcond = resweep(rank_end, rank_start, solvec, spstats);
             rkrecord.update_record(rank_start, rank_end, ri, degofi, r.hsize, rij, spstats.best_cond_global);
         }
 
         // STEP 4: update residual
         double update = t*rij;
-        for (vtype nzi=G->ai[ri] - G->offset; nzi < G->ai[ri+1] - G->offset; ++nzi) {
-            vtype v = G->aj[nzi] - G->offset;
+        for (vtype nzi=ai[ri] - offset; nzi < ai[ri+1] - offset; ++nzi) {
+            vtype v = aj[nzi] - offset;
             //cout << "update " << update << " sr_degree " << sr_degree(G,v) << endl;
-            r.update(v,update/(double)sr_degree(G,v)); // handles the heap internally            
+            r.update(v,update/get_degree_unweighted(v)); // handles the heap internally
         }
 
         // STEP 5: update cut-set stats, check for convergence
@@ -385,7 +381,7 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
             rs = cluster_length;
             cluster_length++;
         }
-        num_rank_swaps += rank_permute<vtype, itype>(cluster, re, rs);   
+        num_rank_swaps += rank_permute(cluster, re, rs);
     }    
     cluster.resize(spstats.rank_of_bcond_global+1); // delete nodes outside best cluster
 
@@ -404,43 +400,61 @@ void graphdiffseed(sparserow<vtype, itype>* G, sparsevec& set, const double t, c
  */
 
 template<typename vtype, typename itype>
-void hypercluster_graphdiff_multiple(sparserow<vtype, itype>* G, const std::vector<vtype>& set,
-                        double t, double eps, double rho, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
-                         std::vector<vtype>& cluster)
+void graph<vtype,itype>::hypercluster_graphdiff_multiple(const std::vector<vtype>& set, double t, double eps,
+                                                         double rho, eps_info<vtype>& ep_stats, rank_record<vtype>& rkrecord,
+                                                         std::vector<vtype>& cluster)
 {
     // reset data
     sparsevec r; r.map.clear();
     cout << "beginning of hypercluster_graphdiff_multiple() " << endl;
-    size_t maxdeg = 0;
+    //size_t maxdeg = 0;
     for (size_t i=0; i<set.size(); ++i) { //populate r with indices of "set"
-        assert(set[i] >= 0); assert(set[i] < G->n); // assert that "set" contains indices i: 1<=i<=n
-        size_t setideg = sr_degree(G,set[i]);
-        r.map[set[i]] += 1.0/(double)(set.size()*(double)setideg);
+        assert(set[i] >= 0); assert(set[i] < n); // assert that "set" contains indices i: 1<=i<=n
+        double setideg = get_degree_unweighted(set[i]);
+        r.map[set[i]] += 1.0/(double)(set.size()*setideg);
         // r is normalized to be stochastic, then degree-normalized
-        printf("i = %lu \t set[i] = %lld \t setideg = %lu \n", i, set[i], setideg);
-        maxdeg = std::max(maxdeg, setideg);
+        cout << "i = "<< i << "\t set[i] = " << set[i] << "\t setideg = " << setideg << endl;
+        //maxdeg = std::max(maxdeg, setideg);
     }
     printf("at last, graphdiffseed: t=%f eps=%f \n", t, eps);
     
     const vtype max_npush = std::min( 
         (vtype)std::numeric_limits<int>::max() , (vtype)(1/((1-t)*eps)) );
-    graphdiffseed<vtype, itype>(G, r, t, eps, rho, max_npush, ep_stats, rkrecord, cluster);
+    graphdiffseed(r, t, eps, rho, max_npush, ep_stats, rkrecord, cluster);
 
 }  // END hyper_cluster_graphdiff_multiple()
             
 template<typename vtype, typename itype>
-void copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype n, vtype offset)
+void graph<vtype,itype>::copy_array_to_index_vector(const vtype* v, std::vector<vtype>& vec, vtype num)
 {
-    vec.resize(n);
+    vec.resize(num);
     
-    for (size_t i=0; i<n; ++i) {
+    for (size_t i=0; i<num; ++i) {
         vec[i] = v[i] - offset;
     }
 }  // END copy_array_to_index_vector()
 
-template<typename vtype, typename itype>
-size_t sr_degree(sparserow<vtype, itype> *s, vtype u) {
-    return (s->ai[u+1] - s->ai[u]);
-}
 
-#endif
+
+
+int64_t ppr_path64(int64_t n, int64_t* ai, int64_t* aj, int64_t offset, double alpha,
+                   double eps, double rho, int64_t* seedids, int64_t nseedids, int64_t* xids,
+                   int64_t xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
+{
+    graph<int64_t,int64_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    return g.ppr_path(alpha, eps, rho, seedids, nseedids, xids, xlength, ret_path_results, ret_rank_results);
+}
+uint32_t ppr_path32(uint32_t n, uint32_t* ai, uint32_t* aj, uint32_t offset, double alpha,
+                    double eps, double rho, uint32_t* seedids, uint32_t nseedids, uint32_t* xids,
+                    uint32_t xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
+{
+    graph<uint32_t,uint32_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    return g.ppr_path(alpha, eps, rho, seedids, nseedids, xids, xlength, ret_path_results, ret_rank_results);
+}
+uint32_t ppr_path32_64(uint32_t n, int64_t* ai, uint32_t* aj, uint32_t offset, double alpha,
+                       double eps, double rho, uint32_t* seedids, uint32_t nseedids, uint32_t* xids,
+                       uint32_t xlength, struct path_info ret_path_results, struct rank_info ret_rank_results)
+{
+    graph<uint32_t,int64_t> g(ai[n],n,ai,aj,NULL,offset,NULL);
+    return g.ppr_path(alpha, eps, rho, seedids, nseedids, xids, xlength, ret_path_results, ret_rank_results);
+}
