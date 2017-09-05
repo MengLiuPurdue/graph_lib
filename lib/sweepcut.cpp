@@ -167,7 +167,7 @@ vtype graph<vtype,itype>::sweep_cut(vtype* ids, vtype* results, vtype num, doubl
     }
     //cout << total_degree << endl;
     double deg, cut_change, neighbor;
-    vtype min_id;
+    vtype min_id = 0;
     double cur_cond;
     double curcutsize = 0;
     double curvolume = 0;
