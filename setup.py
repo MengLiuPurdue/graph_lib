@@ -17,9 +17,6 @@ import subprocess
 class MyInstall(install):
     def run(self):
         path = os.getcwd().replace(" ", "\ ").replace("(","\(").replace(")","\)") + "/bin/"
-        f = open('/home/meng/Desktop/test.txt','w')
-        f.write(str(path))
-        f.close()
         subprocess.call(['chmod', '+x', os.path.join(path,'compile_library.sh')])
         subprocess.call(['sh',os.path.join(path,'compile_library.sh')])
         install.run(self)
@@ -31,7 +28,7 @@ with open(path.join(path.join(here, 'graph_lib'),'README.rst'), encoding='utf-8'
     long_description = f.read()
 
 setup(name='graph_lib',
-      version='0.2.0',
+      version='0.4.0',
       description='A set of useful diffusion related graph algorithm',
       url='https://github.com/MengLiuPurdue/graph_lib',
       long_description=long_description,
@@ -44,7 +41,11 @@ setup(name='graph_lib',
                         'numpy >= 1.12.0',
                         ],
       package_data={
-      'graph_lib': ['*'],
+      'graph_lib.lib': ['*'],
+      'graph_lib.wrappers': ['*'],
+      'graph_lib.graph': ['*.smat'],
+      'graph_lib': ['*.py'],
+      'graph_lib': ['*.ipynb'],
       'graph_lib.lib.graph_lib_test': ['*'],
       'graph_lib.lib.graph_lib_test': ['*.dylib'],
       'graph_lib.lib.graph_lib_test': ['Makefile'],

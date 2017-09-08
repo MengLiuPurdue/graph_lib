@@ -78,7 +78,7 @@ The first three functions will sort "ids" based on the decreasing order of "valu
 
 
 ## Usage
-Inside the graph\_lib/lib/graph\_lib\_test folder, use the following command to create the dynamic library and all the executable files,
+Inside the "graph\_lib/lib/graph\_lib\_test" folder, use the following command to create the dynamic library and all the executable files,
 	
 	make
 	
