@@ -60,21 +60,21 @@ The first three functions will sort "ids" based on the decreasing order of "valu
 
 ### proxl1PRaccel
  * INPUT:
- *     alpha     - teleportation parameter between 0 and 1
- *     rho       - l1-reg. parameter
- *     v         - seed node
- *     ai,aj,a   - Compressed sparse row representation of A
- *     d         - vector of node strengths
- *     epsilon   - accuracy for termination criterion
- *     n         - size of A
- *     ds        - the square root of d
- *     dsinv     - 1/ds
- *     offset    - offset for zero based arrays (matlab) or one based arrays (julia)
+ * alpha     - teleportation parameter between 0 and 1
+ * rho       - l1-reg. parameter
+ * v         - seed node
+ * ai,aj,a   - Compressed sparse row representation of A
+ * d         - vector of node strengths
+ * epsilon   - accuracy for termination criterion
+ * n         - size of A
+ * ds        - the square root of d
+ * dsinv     - 1/ds
+ * offset    - offset for zero based arrays (matlab) or one based arrays (julia)
  *
  * OUTPUT:
- *     p              - PageRank vector as a row vector
- *     not_converged  - flag indicating that maxiter has been reached
- *     grad           - last gradient
+ * p              - PageRank vector as a row vector
+ * not_converged  - flag indicating that maxiter has been reached
+ * grad           - last gradient
 
 
 ## Usage
