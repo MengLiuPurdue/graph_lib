@@ -11,6 +11,7 @@ A graph library with C interface and julia, python and matlab wrappers.
 * xlength - the max number of ids in the solution vector
 * xids, actual_length - the solution vector
 * values - the pagerank value vector for xids (already sorted in decreasing order)
+
 ### sweepcut
 * ai,aj,offset - Compressed sparse row representation, with offset for zero based (matlab) on one based arrays (julia)
 * ids - the order of vertices given
@@ -57,8 +58,27 @@ The first three functions will sort "ids" based on the decreasing order of "valu
  * nseedids - number of indices in seed set
  * xids, xlength - the solution vector
 
+### proxl1PRaccel
+ * INPUT:
+ *     alpha     - teleportation parameter between 0 and 1
+ *     rho       - l1-reg. parameter
+ *     v         - seed node
+ *     ai,aj,a   - Compressed sparse row representation of A
+ *     d         - vector of node strengths
+ *     epsilon   - accuracy for termination criterion
+ *     n         - size of A
+ *     ds        - the square root of d
+ *     dsinv     - 1/ds
+ *     offset    - offset for zero based arrays (matlab) or one based arrays (julia)
+ *
+ * OUTPUT:
+ *     p              - PageRank vector as a row vector
+ *     not_converged  - flag indicating that maxiter has been reached
+ *     grad           - last gradient
+
+
 ## Usage
-Inside the lib/graph\_lib\_test folder, use the following command to create the dynamic library and all the executable files,
+Inside the graph\_lib/lib/graph\_lib\_test folder, use the following command to create the dynamic library and all the executable files,
 	
 	make
 	
@@ -69,4 +89,8 @@ use the following command to run all the tests,
 use the following command to delete all the generated files,
 
 	make clean
+
+## Python Package
+
+	pip install graph_lib
 	

@@ -7,10 +7,13 @@
 # Unignore all dirs
 !*/
 
-*.ipynb
 *.pyc
 *.swp
 *.o
 *.dylib
 *.DS_Store
 *.m~
+*dist/
+*build/
+*graph_lib.egg-info/
+*.ipynb_checkpoints/
