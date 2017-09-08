@@ -28,11 +28,11 @@ with open(path.join(path.join(here, 'graph_lib'),'README.rst'), encoding='utf-8'
     long_description = f.read()
 
 setup(name='graph_lib',
-      version='0.4.0',
+      version='0.4.8',
       description='A set of useful diffusion related graph algorithm',
       url='https://github.com/MengLiuPurdue/graph_lib',
       long_description=long_description,
-      author='Meng Liu, David Gleich',
+      author='Meng Liu, David F. Gleich',
       author_email='liu1740@purdue.edu',
       license='GPL',
       packages=['graph_lib'],
@@ -40,16 +40,14 @@ setup(name='graph_lib',
       install_requires=[
                         'numpy >= 1.12.0',
                         ],
+      scripts=['bin/compile_library.sh'],
+      cmdclass={'install':MyInstall},
       package_data={
       'graph_lib.lib': ['*'],
       'graph_lib.wrappers': ['*'],
       'graph_lib.graph': ['*.smat'],
       'graph_lib': ['*.py'],
-      'graph_lib': ['*.ipynb'],
       'graph_lib.lib.graph_lib_test': ['*'],
-      'graph_lib.lib.graph_lib_test': ['*.dylib'],
       'graph_lib.lib.graph_lib_test': ['Makefile'],
       },
-      scripts=['bin/compile_library.sh'],
-      cmdclass={'install':MyInstall},
       zip_safe=False)
