@@ -32,8 +32,9 @@
 using namespace std;
 
 template<typename vtype, typename itype>
-double densest_subgraph(vtype *ret_set, size_t *actual_length)
+double graph<vtype,itype>::densest_subgraph(vtype *ret_set, vtype *actual_length)
 {
+    //cout << "here" << endl;
     vtype nverts, src, dest;
     itype nedges;
     double g, maxflow;
@@ -52,23 +53,29 @@ double densest_subgraph(vtype *ret_set, size_t *actual_length)
     vtype *fin = (vtype *)malloc(sizeof(vtype) * nverts);
     vtype *pro = (vtype *)malloc(sizeof(vtype) * nverts);
     vtype *another_pro = (vtype *)malloc(sizeof(vtype) * nverts);
-    vtype *pro3 = (int64_t *)malloc(sizeof(int64_t) * nverts);
+    vtype *pro3 = (vtype *)malloc(sizeof(vtype) * nverts);
     vtype *dist = (vtype *)malloc(sizeof(vtype) * nverts);
     double *flow = (double *)malloc(sizeof(double) * 2 * nedges);
     double *cap = (double *)malloc(sizeof(double) * 2 * nedges);
     vtype *next = (vtype *)malloc(sizeof(vtype) * 2 * nedges);
     vtype *to = (vtype *)malloc(sizeof(vtype) * 2 * nedges);
     vtype *cut = (vtype *)malloc(sizeof(vtype) * nverts);
+    double* all_degs = (double*)malloc(sizeof(double) * n);
+    //cout << "ok" << endl;
+
+    for(size_t i = 0; i < (size_t)n; i ++){
+        all_degs[i] = get_degree_weighted(i);
+    }
 
     /*Andrew Goldberg's algorithm*/
     while(n * (n - 1) * (U - L) >= 1){
+        //cout << "ok" << endl;
         iter ++;
         g = (U + L) / 2;
         src = 0;
         dest = nverts - 1;
-        init_edges(edges_info, degree, n, m, src, dest, g);
         cout << "flow iteration " << iter << ": range = (" << L << ", " << U << "), solution = ";
-        maxflow = max_flow_ds<vtype,itype>(ai, aj, a, degrees, n, m, src, dest, Q, fin, pro, dist,
+        maxflow = max_flow_ds<vtype,itype>(ai, aj, a, all_degs, n, m, src, dest, Q, fin, pro, dist,
                                            next, to,cut, another_pro, pro3, flow, cap, g);
         cout << maxflow << endl;
         if(accumulate(cut, cut + nverts, 0) == 1){
@@ -90,9 +97,11 @@ double densest_subgraph(vtype *ret_set, size_t *actual_length)
     for(size_t i = 1; i < (size_t)nverts - 1; i ++){
         if(final_cut[i] != 0){
             ret_set[num ++] = i - 1;
+            //cout << pro3[i] << endl;
             for(vtype &e = pro3[i]; e >= 0; e = next[e]){
                 if(final_cut[to[e]] != 0){
                     final_degree += cap[e];
+                    //cout << e << " " << cap[e] << endl; 
                 }
             }
         }
@@ -102,8 +111,6 @@ double densest_subgraph(vtype *ret_set, size_t *actual_length)
 
     /*free space*/
     free(final_cut);
-    free(degree);
-    free(edges_info);
     free(Q);
     free(fin);
     free(pro);
@@ -115,6 +122,8 @@ double densest_subgraph(vtype *ret_set, size_t *actual_length)
     free(next);
     free(to);
     free(cut);
+    free(all_degs);
+    //cout << "final_degree " << final_degree << endl;
     return final_degree;
 }
 

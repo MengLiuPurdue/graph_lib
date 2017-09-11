@@ -1,15 +1,17 @@
-#ifndef graph_check_hpp
-#define graph_check_hpp
+#ifndef GRAPH_CHECK_HPP
+#define GRAPH_CHECK_HPP
 
 #include <stdio.h>
 
 template<typename vtype, typename itype>
-bool check_symmetric(itype* ai, vtype* aj, itype m, vtype n);
+bool check_symmetric(vtype* ei, vtype* ej, itype m, vtype n);
 
 template<typename vtype, typename itype>
-bool check_repeated(itype* ai, vtype* aj, itype m, vtype n);
+bool check_repeated(vtype* ei, vtype* ej, itype m, vtype n);
 
 template<typename vtype, typename itype>
-bool check_diagonal(itype* ai, vtype* aj, itype m, vtype n);
+bool check_diagonal(vtype* ei, vtype* ej, itype m);
+
+#include "../graph_check.cpp"
 
 #endif

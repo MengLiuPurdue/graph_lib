@@ -65,7 +65,7 @@ public:
                         double* ds, double* dsinv, double epsilon, double* grad, double* p,
                         vtype maxiter,double max_time);
     //functions in densest_subgraph.cpp
-    double densest_subgraph(vtype *ret_set, size_t *actual_length);
+    double densest_subgraph(vtype *ret_set, vtype *actual_length);
 };
 
 template<typename vtype, typename itype>
